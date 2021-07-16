@@ -1,22 +1,27 @@
-package com.example.outfitsearch;
+package com.example.outfitsearch.activities;
 
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.view.View;
+import android.os.Environment;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.outfitsearch.R;
 import com.example.outfitsearch.databinding.ActivityMainBinding;
 
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,14 +40,6 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     @Override

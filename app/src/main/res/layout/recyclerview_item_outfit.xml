@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="4dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <ImageView
+            android:id="@+id/imageview_outfit_thumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:src="@drawable/photo_placeholder"
+            android:layout_gravity="top"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:layout_weight="9"
+            android:contentDescription="@string/content_description_outfit_photo"
+            />
+        <TextView
+            android:id="@+id/textview_outfit_contents"
+            tools:text="Pink shirt, black skirt, brown boots"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:textAlignment="center"
+            android:layout_weight="1"
+            android:textSize="18sp"
+            />
+    </LinearLayout>
+
+
+</androidx.cardview.widget.CardView>

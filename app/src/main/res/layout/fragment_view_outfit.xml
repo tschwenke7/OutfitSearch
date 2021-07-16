@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/default_margin"
+    android:layout_marginEnd="@dimen/default_margin">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".activities.ui.viewoutfit.ViewOutfitFragment"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/default_margin">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_category_spinners"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/season_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:text="@string/season_label"
+                style="@style/miniHeading"
+                app:layout_constraintEnd_toStartOf="@+id/formality_label"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/formality_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="@string/formality_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/season_label"
+                app:layout_constraintTop_toTopOf="@id/season_label" />
+
+            <Spinner
+                android:id="@+id/spinner_season"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+
+                android:layout_marginEnd="4dp"
+                app:layout_constraintEnd_toStartOf="@+id/spinner_formality"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/season_label" />
+
+            <Spinner
+                android:id="@+id/spinner_formality"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                app:layout_constraintBottom_toBottomOf="@+id/spinner_season"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/spinner_season"
+                app:layout_constraintTop_toTopOf="@+id/spinner_season" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/outfit_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/content_description_outfit_photo"
+            app:srcCompat="@drawable/photo_placeholder" />
+
+        <TextView
+            android:id="@+id/textview_file_uri"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/button_take_photo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/take_photo_button"
+                android:layout_marginEnd="4dp"/>
+
+            <Button
+                android:id="@+id/button_choose_photo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/browse_button"
+                android:layout_marginStart="4dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/clothing_items_used"
+            style="@style/subheading"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <AutoCompleteTextView
+                android:id="@+id/edit_text_add_item"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:completionThreshold="1"
+                android:inputType="textAutoCorrect|textAutoComplete|textCapSentences"
+                android:hint="@string/new_item_of_clothing_hint" />
+
+            <Button
+                android:id="@+id/button_add_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_button"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_clothing_items"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:nestedScrollingEnabled="false"
+            tools:itemCount="5"
+            tools:listitem="@layout/recyclerview_item_clothing_item" />
+
+    </LinearLayout>
+</ScrollView>

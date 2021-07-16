@@ -7,6 +7,23 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+    <!-- Browse outfits fragment -->
+    <string name="add_outfit_option">Add outfit</string>
+    <string name="browse_button">Browse</string>
+    <string name="no_clothing_items_placeholder">No clothing items have been listed - click to add some.</string>
+
+    <!-- View outfit fragment -->
+    <string name="take_photo_button">Take Photo</string>
+    <string name="content_description_outfit_photo">Photo of outfit</string>
+    <string name="delete_outfit_option">Delete outfit</string>
+    <string name="browse_fragment_label">Browse Fragment</string>
+    <string name="view_outfit_fragment_label">View Outfit Fragment</string>
+    <string name="add_button">Add</string>
+    <string name="new_item_of_clothing_hint">New item of clothing...</string>
+    <string name="formality_label">Formality</string>
+    <string name="season_label">Season</string>
+    <string name="delete_button">Delete button</string>
+    <string name="clothing_items_used">Clothing Items Used</string>
+
 </resources>
