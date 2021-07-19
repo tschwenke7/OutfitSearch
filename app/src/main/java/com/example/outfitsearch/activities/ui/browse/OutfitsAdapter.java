@@ -115,9 +115,9 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
         public void bind(Outfit outfit){
             //set thumbnail image if provided
             String uri = outfit.getImageUri();
+            ImageView imageView = itemView.findViewById(R.id.imageview_outfit_thumbnail);
             if(null != uri){
-                ((ImageView) itemView.findViewById(R.id.imageview_outfit_thumbnail))
-                        .setImageURI(Uri.parse(uri));
+                imageView.setImageURI(Uri.parse(uri));
             }
 
             //set textbox listing clothing items, and make it update if their are changes
@@ -140,7 +140,13 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
                 }
 
                 //set list of items
-                ((TextView) itemView.findViewById(R.id.textview_outfit_contents)).setText(textViewContent);
+                TextView textView = itemView.findViewById(R.id.textview_outfit_contents);
+                textView.setText(textViewContent);
+
+                //now that everything is loaded, show the contents and hide the loading bar
+                itemView.findViewById(R.id.item_names_loading_spinner).setVisibility(View.GONE);
+                textView.setVisibility(View.VISIBLE);
+                imageView.setVisibility(View.VISIBLE);
             }));
 
             //set click listener for outfit to navigate to view outfit page

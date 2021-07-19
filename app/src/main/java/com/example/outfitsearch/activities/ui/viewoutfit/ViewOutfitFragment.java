@@ -135,8 +135,6 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
         clothingRecyclerView.setAdapter(adapter);
         clothingRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
 
-        currentOutfit.getClothingItems().observe(getViewLifecycleOwner(), adapter::setList);
-
         //setup buttons
         binding.buttonChoosePhoto.setOnClickListener(v -> mGetContent.launch("image/*"));
 
@@ -162,6 +160,8 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
                 input.setText("");
             }
         });
+
+        currentOutfit.getClothingItems().observe(getViewLifecycleOwner(), adapter::setList);
     }
 
     @Override

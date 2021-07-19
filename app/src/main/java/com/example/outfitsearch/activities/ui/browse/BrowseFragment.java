@@ -53,7 +53,11 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
 
 
         //observe all outfits
-        outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), adapter::setList);
+        outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> {
+            adapter.setList(list);
+            binding.loadingSpinner.setVisibility(View.GONE);
+            binding.recyclerviewOutfits.setVisibility(View.VISIBLE);
+        });
 //        outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> outfitViewModel.clearAllOutfits());
 
     }
