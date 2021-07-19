@@ -25,5 +25,10 @@
     <string name="season_label">Season</string>
     <string name="delete_button">Delete button</string>
     <string name="clothing_items_used">Clothing Items Used</string>
+    <string name="delete_outfit_warning">Delete Outfit</string>
+    <string name="delete_outfit_warning_prompt">Are you sure you want to delete this outfit?</string>
+    <string name="delete">Delete</string>
+    <string name="delete_outfit_success">Outfit deleted.</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

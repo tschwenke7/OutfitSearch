@@ -3,12 +3,14 @@ package com.example.outfitsearch.activities.ui.viewoutfit;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.outfitsearch.R;
+import com.example.outfitsearch.databinding.RecyclerviewItemClothingItemBinding;
 import com.example.outfitsearch.db.tables.ClothingItem;
 
 import org.jetbrains.annotations.NotNull;
@@ -103,12 +105,18 @@ public class ClothingItemsAdapter extends RecyclerView.Adapter<ClothingItemsAdap
         }
 
         public void bind(ClothingItem item){
+            //set text to item's name
+            ((TextView) itemView.findViewById(R.id.text_view_item_name)).setText(item.getName());
 
+            //listen for delete button being clicked
+            (itemView.findViewById(R.id.button_delete_item)).setOnClickListener((v) ->
+                    clickListener.onDeleteItemClicked(getAdapterPosition()));
         }
     }
 
     public interface ClothingItemClickListener {
-        void onDeleteClicked(int position);
+        void onDeleteItemClicked(int position);
+
         //todo - search for all outfits with this item on double click or similar gesture
 //        void onItemDoubleClick(int position, boolean isSecondClick);
     }

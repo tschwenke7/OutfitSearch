@@ -12,6 +12,7 @@ import com.example.outfitsearch.db.tables.Outfit;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -72,5 +73,31 @@ public class OutfitViewModel extends AndroidViewModel {
         for (Outfit outfit : allOutfits.getValue()) {
             outfitRepository.deleteOutfit(outfit);
         }
+    }
+
+    public void deleteOutfit(Outfit outfit) {
+        //delete associated image file if one exists
+        if(outfit.getImageUri() != null){
+            File file = new File(outfit.getImageUri());
+            if (file.exists()){
+                file.delete();
+            }
+        }
+        //delete the db entry
+        outfitRepository.deleteOutfit(outfit);
+    }
+
+    public void addItemToOutfit(String itemName, Outfit currentOutfit) {
+        //populate clothing item db entry
+        ClothingItem clothingItem = new ClothingItem();
+        clothingItem.setName(itemName);
+        clothingItem.setOutfitId(currentOutfit.getId());
+
+        //insert into db
+        outfitRepository.insertClothingItem(clothingItem);
+    }
+
+    public void deleteClothingItem(ClothingItem clothingItem) {
+        outfitRepository.deleteClothingItem(clothingItem);
     }
 }

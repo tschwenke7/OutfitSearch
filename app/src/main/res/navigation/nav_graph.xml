@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_view_specific_outfit"
             app:destination="@id/ViewOutfitFragment" />
+        <argument
+            android:name="queryString"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/ViewOutfitFragment"
@@ -25,5 +28,8 @@
             android:name="outfitId"
             app:argType="integer"
             android:defaultValue="-1" />
+        <action
+            android:id="@+id/action_view_outfit_to_browse"
+            app:destination="@id/BrowseFragment" />
     </fragment>
 </navigation>

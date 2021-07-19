@@ -2,6 +2,7 @@ package com.example.outfitsearch.activities.ui.viewoutfit;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
@@ -11,21 +12,28 @@ import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.activities.ui.OutfitViewModel;
 import com.example.outfitsearch.databinding.FragmentViewOutfitBinding;
+import com.example.outfitsearch.db.tables.ClothingItem;
 import com.example.outfitsearch.db.tables.Outfit;
 
 import org.jetbrains.annotations.NotNull;
@@ -36,22 +44,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
 
 public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter.ClothingItemClickListener{
 
     private FragmentViewOutfitBinding binding;
     private OutfitViewModel outfitViewModel;
     private Outfit currentOutfit;
+    private LiveData<List<ClothingItem>> currentClothingItems;
 
     ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
             uri -> {
-
-
-                //save the new uri to the device
+                //get the uri of where this photo will be saved
                 String newFileUriString = saveImage(uri);
 
                 //change the image immediately
-                binding.textviewFileUri.setText(newFileUriString);
+                binding.outfitPhoto.setImageURI(null);
                 binding.outfitPhoto.setImageURI(Uri.parse(newFileUriString));
 
                 //save path to this image in db
@@ -128,8 +136,8 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
         clothingRecyclerView.setAdapter(adapter);
         clothingRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
 
-        outfitViewModel.getClothesForOutfit(currentOutfit.getId())
-                .observe(getViewLifecycleOwner(), adapter::setList);
+        currentClothingItems = outfitViewModel.getClothesForOutfit(currentOutfit.getId());
+        currentClothingItems.observe(getViewLifecycleOwner(), adapter::setList);
 
         //setup buttons
         binding.buttonChoosePhoto.setOnClickListener(v -> mGetContent.launch("image/*"));
@@ -145,8 +153,16 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
 //            }
 //        });
 
+        //setup listener to add new clothing item
         binding.buttonAddItem.setOnClickListener((view) -> {
-            
+            TextView input = binding.editTextAddItem;
+            String inputString = input.getText().toString();
+            if (!inputString.isEmpty()){
+                outfitViewModel.addItemToOutfit(inputString, currentOutfit);
+
+                //clear edittext after consuming its contents
+                input.setText("");
+            }
         });
     }
 
@@ -199,7 +215,34 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
     }
 
     @Override
-    public void onDeleteClicked(int position) {
-        //todo
+    public boolean onOptionsItemSelected(@NonNull @NotNull MenuItem item) {
+        switch(item.getItemId()){
+            //respond to delete menu option being clicked by prompting to delete this outfit
+            case R.id.action_delete_outfit:
+                View root = requireView();
+                new AlertDialog.Builder(root.getContext())
+                        .setTitle(R.string.delete_outfit_warning)
+                        .setMessage(root.getContext().getString(R.string.delete_outfit_warning_prompt))
+                        .setPositiveButton(R.string.delete, (dialogInterface, i) -> {
+                            Toast.makeText(root.getContext(), R.string.delete_outfit_success, Toast.LENGTH_LONG).show();
+                            //delete outfit from db
+                            outfitViewModel.deleteOutfit(currentOutfit);
+                            //navigate back to browse fragment
+                            Navigation.findNavController(root).navigate(R.id.action_view_outfit_to_browse);
+                        })
+                        //otherwise don't do anything
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+                break;
+        }
+        return false;
+    }
+
+    @Override
+    public void onDeleteItemClicked(int position) {
+        ClothingItem item = currentClothingItems.getValue().get(position);
+        if(null != item){
+            outfitViewModel.deleteClothingItem(item);
+        }
     }
 }

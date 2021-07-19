@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
+    app:layout_constraintBottom_toBottomOf="parent"
     android:layout_marginStart="@dimen/default_margin"
     android:layout_marginEnd="@dimen/default_margin">
 
@@ -100,7 +101,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/browse_button"
-                android:layout_marginStart="4dp"/>
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="16dp"/>
         </LinearLayout>
 
         <TextView
@@ -114,7 +116,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            >
 
             <AutoCompleteTextView
                 android:id="@+id/edit_text_add_item"
@@ -124,14 +127,15 @@
                 android:ems="10"
                 android:completionThreshold="1"
                 android:inputType="textAutoCorrect|textAutoComplete|textCapSentences"
-                android:hint="@string/new_item_of_clothing_hint" />
+                android:hint="@string/new_item_of_clothing_hint"
+                android:layout_marginEnd="4dp"/>
 
             <Button
                 android:id="@+id/button_add_item"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/add_button"
-                android:layout_gravity="center_vertical"/>
+                android:layout_gravity="bottom"/>
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -140,7 +144,10 @@
             android:layout_height="match_parent"
             android:nestedScrollingEnabled="false"
             tools:itemCount="5"
-            tools:listitem="@layout/recyclerview_item_clothing_item" />
+            tools:listitem="@layout/recyclerview_item_clothing_item"
+            android:layout_marginBottom="48dp"
+            android:layout_marginTop="16dp"
+            />
 
     </LinearLayout>
 </ScrollView>

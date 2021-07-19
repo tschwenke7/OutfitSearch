@@ -135,7 +135,11 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
                 textViewContent = "No clothing items have been listed - click to add some.";
             }
 
+            //set list of items
             ((TextView) itemView.findViewById(R.id.textview_outfit_contents)).setText(textViewContent);
+
+            //set click listener for outfit to navigate to view outfit page
+            itemView.setOnClickListener((v) -> outfitClickListener.onOutfitClick(getAdapterPosition()));
         }
     }
 

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.activities.ui.OutfitViewModel;
+import com.example.outfitsearch.activities.ui.viewoutfit.ViewOutfitFragment;
 import com.example.outfitsearch.databinding.FragmentBrowseBinding;
 
 import org.jetbrains.annotations.NotNull;
@@ -84,6 +85,9 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
 
     @Override
     public void onOutfitClick(int position) {
-        //todo - safeargs outfit id then naviagte
+        //navigate to the view outfit page, passing the outfit's unique id as a parameter
+        BrowseFragmentDirections.ActionViewSpecificOutfit action = BrowseFragmentDirections.actionViewSpecificOutfit();
+        action.setOutfitId(outfitViewModel.getAllOutfits().getValue().get(position).getId());
+        Navigation.findNavController(requireView()).navigate(action);
     }
 }
