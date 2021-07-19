@@ -49,8 +49,11 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
         outfitRecyclerView.setLayoutManager(layoutManager);
         outfitRecyclerView.setAdapter(adapter);
 
+
+
         //observe all outfits
         outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), adapter::setList);
+//        outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> outfitViewModel.clearAllOutfits());
 
     }
 

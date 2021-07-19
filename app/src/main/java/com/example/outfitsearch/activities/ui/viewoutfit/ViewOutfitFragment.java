@@ -1,5 +1,9 @@
 package com.example.outfitsearch.activities.ui.viewoutfit;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,7 +31,10 @@ import com.example.outfitsearch.db.tables.Outfit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter.ClothingItemClickListener{
@@ -38,14 +45,38 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
 
     ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
             uri -> {
-                // change the image immediately
-                binding.textviewFileUri.setText(uri.toString());
-                binding.outfitPhoto.setImageURI(uri);
 
-                //save the new uri to the outfit db
-                currentOutfit.setImageUri(uri.toString());
+
+                //save the new uri to the device
+                String newFileUriString = saveImage(uri);
+
+                //change the image immediately
+                binding.textviewFileUri.setText(newFileUriString);
+                binding.outfitPhoto.setImageURI(Uri.parse(newFileUriString));
+
+                //save path to this image in db
+                currentOutfit.setImageUri(newFileUriString);
                 outfitViewModel.updateOutfit(currentOutfit);
             });
+
+    private String saveImage(Uri uri) {
+        try {
+            //get the bitmap from the provided uri
+            Bitmap bitmap = getBitmapFromUri(uri);
+
+            //create/overwrite existing image file for this outfit's image to be saved into
+            File newFile = createImageFile();
+
+            //save the bitmap to the new file
+            saveBitmapToFile(bitmap, newFile);
+
+            //save uri to new photo in db
+            return newFile.getAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     public View onCreateView(
@@ -103,19 +134,16 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
         //setup buttons
         binding.buttonChoosePhoto.setOnClickListener(v -> mGetContent.launch("image/*"));
 
-        binding.buttonTakePhoto.setOnClickListener(v -> {
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (photoFile != null){
-                Uri photoURI = FileProvider.getUriForFile(this.requireContext(),
-                        "com.example.android.fileprovider",
-                        photoFile);
-            }
-        });
+//        binding.buttonTakePhoto.setOnClickListener(v -> {
+//            File photoFile = null;
+//            photoFile = createImageFile();
+//
+//            if (photoFile != null){
+//                Uri photoURI = FileProvider.getUriForFile(this.requireContext(),
+//                        "com.example.android.fileprovider",
+//                        photoFile);
+//            }
+//        });
 
         binding.buttonAddItem.setOnClickListener((view) -> {
             
@@ -128,24 +156,41 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
         binding = null;
     }
 
-    String currentPhotoPath;
-
-    private File createImageFile() throws IOException {
+    private File createImageFile() {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,//imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 
-        // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
+        //get folder to save photo in
+        File folder = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        //create file path
+        String imageFileName = "Outfit_" + currentOutfit.getId() +".jpg";
 
-        return image;
+        //delete existing file if one was there - we should only have one outfit photo
+        File file = new File(folder, imageFileName);
+        if (file.exists()){
+            file.delete();
+        }
+
+        return file;
     }
+
+    private Bitmap getBitmapFromUri(Uri uri) throws FileNotFoundException {
+        InputStream input = requireContext().getContentResolver().openInputStream(uri);
+        if (input == null) {
+            return null;
+        }
+        return BitmapFactory.decodeStream(input);
+    }
+
+    private File saveBitmapToFile(Bitmap bitmap, File file) throws IOException {
+        FileOutputStream out = new FileOutputStream(file);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+        out.flush();
+        out.close();
+
+        return file;
+    }
+
 
     @Override
     public void onCreateOptionsMenu(@NonNull @NotNull Menu menu, @NonNull @NotNull MenuInflater inflater) {
