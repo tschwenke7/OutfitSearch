@@ -27,6 +27,5 @@
         android:id="@+id/recyclerview_outfits"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/recyclerview_item_outfit"
-        android:visibility="invisible"/>
+        tools:listitem="@layout/recyclerview_item_outfit" />
 </LinearLayout>

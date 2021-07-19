@@ -1,10 +1,9 @@
 package com.example.outfitsearch.activities.ui.browse;
 
-import android.content.res.Resources;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.db.tables.ClothingItem;
 import com.example.outfitsearch.db.tables.Outfit;
+import com.example.outfitsearch.utils.ImageUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -114,10 +114,19 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
 
         public void bind(Outfit outfit){
             //set thumbnail image if provided
+            //we need to wait until the imageView has been assigned a size before we
+            // scale and load the image to be placed in it.
             String uri = outfit.getImageUri();
             ImageView imageView = itemView.findViewById(R.id.imageview_outfit_thumbnail);
             if(null != uri){
-                imageView.setImageURI(Uri.parse(uri));
+                imageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        ImageUtils.setPic(imageView, uri);
+                        imageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        return false;
+                    }
+                });
             }
 
             //set textbox listing clothing items, and make it update if their are changes
@@ -146,7 +155,6 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
                 //now that everything is loaded, show the contents and hide the loading bar
                 itemView.findViewById(R.id.item_names_loading_spinner).setVisibility(View.GONE);
                 textView.setVisibility(View.VISIBLE);
-                imageView.setVisibility(View.VISIBLE);
             }));
 
             //set click listener for outfit to navigate to view outfit page

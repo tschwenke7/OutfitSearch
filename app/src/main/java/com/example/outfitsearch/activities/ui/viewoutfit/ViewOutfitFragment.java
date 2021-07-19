@@ -15,6 +15,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +38,7 @@ import com.example.outfitsearch.activities.ui.OutfitViewModel;
 import com.example.outfitsearch.databinding.FragmentViewOutfitBinding;
 import com.example.outfitsearch.db.tables.ClothingItem;
 import com.example.outfitsearch.db.tables.Outfit;
+import com.example.outfitsearch.utils.ImageUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -124,9 +128,19 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
     private void setupViews(){
         //populate image if applicable
         String uriString = currentOutfit.getImageUri();
-        //todo - improve this by loading lower res image dependent on size https://developer.android.com/training/camera/photobasics#java
+        //if an image has been provided, scale it to the available viewspace and load
+        //we have to wait for preDrawListener to know how big the view actually is
         if(uriString != null){
-            binding.outfitPhoto.setImageURI(Uri.parse(currentOutfit.getImageUri()));
+            ImageView outfitPhoto = binding.outfitPhoto;
+            outfitPhoto.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    ImageUtils.setPic(binding.outfitPhoto, currentOutfit.getImageUri());
+                    outfitPhoto.getViewTreeObserver().removeOnPreDrawListener(this);
+                    return false;
+                }
+            });
+
         }
 
         //setup recyclerview of clothing items
@@ -134,6 +148,7 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
         final ClothingItemsAdapter adapter = new ClothingItemsAdapter(this);
         clothingRecyclerView.setAdapter(adapter);
         clothingRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        currentOutfit.getClothingItems().observe(getViewLifecycleOwner(), adapter::setList);
 
         //setup buttons
         binding.buttonChoosePhoto.setOnClickListener(v -> mGetContent.launch("image/*"));
@@ -161,7 +176,11 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
             }
         });
 
-        currentOutfit.getClothingItems().observe(getViewLifecycleOwner(), adapter::setList);
+        //setup autocomplete for adding clothing items
+        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<>(
+                getContext(), android.R.layout.simple_dropdown_item_1line,
+                outfitViewModel.getAllDistinctClothingItems());
+        binding.editTextAddItem.setAdapter(autoCompleteAdapter);
     }
 
     @Override

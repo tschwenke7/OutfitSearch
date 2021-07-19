@@ -124,4 +124,13 @@ public class OutfitViewModel extends AndroidViewModel {
     public void deleteClothingItem(ClothingItem clothingItem) {
         outfitRepository.deleteClothingItem(clothingItem);
     }
+
+    public String[] getAllDistinctClothingItems(){
+        try {
+            return outfitRepository.getAllDistinctClothingItems();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

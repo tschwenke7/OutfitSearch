@@ -1,6 +1,7 @@
 package com.example.outfitsearch.db;
 
 import android.content.Context;
+import android.telecom.Call;
 
 import androidx.lifecycle.LiveData;
 
@@ -80,6 +81,13 @@ public class OutfitRepository {
     public Outfit getOutfitById(int id) throws ExecutionException, InterruptedException {
         Callable<Outfit> callable = () -> outfitDao.getById(id);
         Future<Outfit> future = OutfitDatabase.databaseWriterExecutor.submit(callable);
+
+        return future.get();
+    }
+
+    public String[] getAllDistinctClothingItems() throws ExecutionException, InterruptedException {
+        Callable<String[]> callable = () -> clothingItemDao.getAllUniqueNames();
+        Future<String[]> future = OutfitDatabase.databaseWriterExecutor.submit(callable);
 
         return future.get();
     }

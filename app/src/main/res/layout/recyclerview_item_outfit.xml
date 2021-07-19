@@ -22,7 +22,7 @@
             android:contentDescription="@string/content_description_outfit_photo"
 
             android:src="@drawable/photo_placeholder"
-            android:visibility="gone"
+            android:visibility="visible"
             tools:visibility="visible" />
 
         <ProgressBar
