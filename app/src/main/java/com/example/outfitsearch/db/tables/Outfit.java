@@ -1,5 +1,6 @@
 package com.example.outfitsearch.db.tables;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -28,7 +29,7 @@ public class Outfit {
     private int viewQueueIndex;
 
     @Ignore
-    private List<ClothingItem> clothingItems;
+    private LiveData<List<ClothingItem>> clothingItems;
 
     public Outfit() {
     }
@@ -81,11 +82,11 @@ public class Outfit {
         this.viewQueueIndex = viewQueueIndex;
     }
 
-    public List<ClothingItem> getClothingItems() {
+    public LiveData<List<ClothingItem>> getClothingItems() {
         return clothingItems;
     }
 
-    public void setClothingItems(List<ClothingItem> clothingItems) {
+    public void setClothingItems(LiveData<List<ClothingItem>> clothingItems) {
         this.clothingItems = clothingItems;
     }
 

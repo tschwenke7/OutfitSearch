@@ -5,6 +5,8 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.example.outfitsearch.db.OutfitRepository;
 import com.example.outfitsearch.db.tables.ClothingItem;
@@ -19,12 +21,25 @@ import java.util.concurrent.ExecutionException;
 
 public class OutfitViewModel extends AndroidViewModel {
     private final OutfitRepository outfitRepository;
-    private LiveData<List<Outfit>> allOutfits;
+    private final MutableLiveData<List<Outfit>> allOutfits = new MutableLiveData<>();
 
     public OutfitViewModel(@NonNull @NotNull Application application) {
         super(application);
         outfitRepository = new OutfitRepository(application);
-        allOutfits = outfitRepository.getAllOutfits();
+
+        //when db changes, retrieve clothing items and populate outfits with them
+        Observer<List<Outfit>> outfitObserver = outfits -> {
+            //when db changes, retrieve clothing items and populate outfits with them
+            List<Outfit> populatedOutfits = new ArrayList<>();
+            for (Outfit outfit : outfits) {
+                outfit.setClothingItems(getClothesForOutfit(outfit.getId()));
+                populatedOutfits.add(outfit);
+            }
+
+            allOutfits.setValue(populatedOutfits);
+        };
+
+        outfitRepository.getAllOutfits().observeForever(outfitObserver);
     }
 
     public Outfit generateNewOutfit() {
@@ -36,7 +51,7 @@ public class OutfitViewModel extends AndroidViewModel {
             outfit.setId((int) id);
 
             //initialise empty list of clothing
-            outfit.setClothingItems(new ArrayList<>());
+            outfit.setClothingItems(getClothesForOutfit((int) id));
 
             return outfit;
         }
@@ -49,7 +64,7 @@ public class OutfitViewModel extends AndroidViewModel {
     public Outfit getOutfitById(int id){
         try {
             Outfit outfit = outfitRepository.getOutfitById(id);
-            outfit.setClothingItems(outfitRepository.getOutfitComponents(id));
+            outfit.setClothingItems(outfitRepository.getClothesForOutfitLive(id));
             return outfit;
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
@@ -63,6 +78,15 @@ public class OutfitViewModel extends AndroidViewModel {
 
     public LiveData<List<ClothingItem>> getClothesForOutfit(int id) {
         return outfitRepository.getClothesForOutfitLive(id);
+    }
+
+    public List<ClothingItem> getClothesForOutfitNonLive(int id) {
+        try {
+            return outfitRepository.getClothesForOutfitNonLive(id);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public void updateOutfit(Outfit outfit) {

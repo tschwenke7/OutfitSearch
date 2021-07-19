@@ -51,7 +51,6 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
     private FragmentViewOutfitBinding binding;
     private OutfitViewModel outfitViewModel;
     private Outfit currentOutfit;
-    private LiveData<List<ClothingItem>> currentClothingItems;
 
     ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
             uri -> {
@@ -136,8 +135,7 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
         clothingRecyclerView.setAdapter(adapter);
         clothingRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
 
-        currentClothingItems = outfitViewModel.getClothesForOutfit(currentOutfit.getId());
-        currentClothingItems.observe(getViewLifecycleOwner(), adapter::setList);
+        currentOutfit.getClothingItems().observe(getViewLifecycleOwner(), adapter::setList);
 
         //setup buttons
         binding.buttonChoosePhoto.setOnClickListener(v -> mGetContent.launch("image/*"));
@@ -240,7 +238,7 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
 
     @Override
     public void onDeleteItemClicked(int position) {
-        ClothingItem item = currentClothingItems.getValue().get(position);
+        ClothingItem item = currentOutfit.getClothingItems().getValue().get(position);
         if(null != item){
             outfitViewModel.deleteClothingItem(item);
         }

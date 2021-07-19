@@ -44,7 +44,7 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
         setHasOptionsMenu(true);
 
         RecyclerView outfitRecyclerView = binding.recyclerviewOutfits;
-        final OutfitsAdapter adapter = new OutfitsAdapter(this);
+        final OutfitsAdapter adapter = new OutfitsAdapter(this, getViewLifecycleOwner());
         //if this doesn't work, look here for ref https://stackoverflow.com/questions/42136980/recyclerview-with-rows-and-columns
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireActivity(), GRID_ROW_SIZE);
         outfitRecyclerView.setLayoutManager(layoutManager);

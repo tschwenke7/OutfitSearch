@@ -66,7 +66,7 @@ public class OutfitRepository {
         OutfitDatabase.databaseWriterExecutor.execute(() -> clothingItemDao.delete(clothingItem));
     }
 
-    public List<ClothingItem> getOutfitComponents(int outfitId) throws ExecutionException, InterruptedException {
+    public List<ClothingItem> getClothesForOutfitNonLive(int outfitId) throws ExecutionException, InterruptedException {
         Callable<List<ClothingItem>> callable = () -> clothingItemDao.getAllFromOutfit(outfitId);
         Future<List<ClothingItem>> future = OutfitDatabase.databaseWriterExecutor.submit(callable);
 

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,9 +25,11 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
 
     private List<Outfit> outfits;
     private final OutfitClickListener outfitClickListener;
+    private LifecycleOwner lifecycleOwner;
 
-    public OutfitsAdapter(OutfitClickListener outfitClickListener) {
+    public OutfitsAdapter(OutfitClickListener outfitClickListener, LifecycleOwner lifecycleOwner) {
         this.outfitClickListener = outfitClickListener;
+        this.lifecycleOwner = lifecycleOwner;
     }
 
     @NonNull
@@ -117,26 +120,28 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
                         .setImageURI(Uri.parse(uri));
             }
 
-            //set textbox listing clothing items
-            List<ClothingItem> items = outfit.getClothingItems();
-            StringBuilder stringBuilder = new StringBuilder();
-            if(null != items){
-                for(ClothingItem item : items){
-                    stringBuilder.append(item.getName() + ", ");
+            //set textbox listing clothing items, and make it update if their are changes
+            outfit.getClothingItems().observe(lifecycleOwner, (clothingItems -> {
+                List<ClothingItem> items = outfit.getClothingItems().getValue();
+                StringBuilder stringBuilder = new StringBuilder();
+                if(null != items){
+                    for(ClothingItem item : items){
+                        stringBuilder.append(item.getName() + ", ");
+                    }
                 }
-            }
-            //remove the trailing comma and space, if any items were added
-            String textViewContent = stringBuilder.toString();
-            if(textViewContent.length() > 0){
-                textViewContent = textViewContent.substring(0,textViewContent.lastIndexOf(","));
-            }
-            //if no items, then use placeholder text
-            else {
-                textViewContent = "No clothing items have been listed - click to add some.";
-            }
+                //remove the trailing comma and space, if any items were added
+                String textViewContent = stringBuilder.toString();
+                if(textViewContent.length() > 0){
+                    textViewContent = textViewContent.substring(0,textViewContent.lastIndexOf(","));
+                }
+                //if no items, then use placeholder text
+                else {
+                    textViewContent = "No clothing items have been listed - click to add some.";
+                }
 
-            //set list of items
-            ((TextView) itemView.findViewById(R.id.textview_outfit_contents)).setText(textViewContent);
+                //set list of items
+                ((TextView) itemView.findViewById(R.id.textview_outfit_contents)).setText(textViewContent);
+            }));
 
             //set click listener for outfit to navigate to view outfit page
             itemView.setOnClickListener((v) -> outfitClickListener.onOutfitClick(getAdapterPosition()));
