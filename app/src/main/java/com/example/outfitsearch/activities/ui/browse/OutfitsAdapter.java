@@ -112,10 +112,10 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
         public void bind(Outfit outfit){
             //set thumbnail image if provided
             String uri = outfit.getImageUri();
-            if(null != uri){
-                ((ImageView) itemView.findViewById(R.id.imageview_outfit_thumbnail))
-                        .setImageURI(Uri.parse(uri));
-            }
+//            if(null != uri){
+//                ((ImageView) itemView.findViewById(R.id.imageview_outfit_thumbnail))
+//                        .setImageURI(Uri.parse(uri));
+//            }
 
             //set textbox listing clothing items
             List<ClothingItem> items = outfit.getClothingItems();

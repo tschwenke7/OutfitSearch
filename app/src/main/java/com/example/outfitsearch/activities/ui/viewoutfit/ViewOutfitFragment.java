@@ -116,6 +116,10 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
                         photoFile);
             }
         });
+
+        binding.buttonAddItem.setOnClickListener((view) -> {
+            
+        });
     }
 
     @Override

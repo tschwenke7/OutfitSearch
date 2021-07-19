@@ -67,4 +67,10 @@ public class OutfitViewModel extends AndroidViewModel {
     public void updateOutfit(Outfit outfit) {
         outfitRepository.updateOutfit(outfit);
     }
+
+    public void clearAllOutfits(){
+        for (Outfit outfit : allOutfits.getValue()) {
+            outfitRepository.deleteOutfit(outfit);
+        }
+    }
 }
