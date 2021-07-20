@@ -63,6 +63,14 @@ public class ViewOutfitFragment extends Fragment
 
     ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
             uri -> {
+                //make progress bar take up same space as image
+                // by splitting height difference between top and bottom padding
+                int paddingHeight = (binding.outfitPhoto.getHeight() - 176) / 2;
+                binding.outfitPhotoProgressBar.setPadding(0,paddingHeight,
+                        0,paddingHeight);
+                //show progress spinner and hide image while new photo is loading
+                binding.outfitPhotoProgressBar.setVisibility(View.VISIBLE);
+                binding.outfitPhoto.setVisibility(View.GONE);
 
                 //get the uri of where this photo will be saved
                 LiveData<String> newUriLiveData = outfitViewModel.saveImage(currentOutfit, uri);
@@ -72,6 +80,9 @@ public class ViewOutfitFragment extends Fragment
                         //change the image immediately
 //                        binding.outfitPhoto.setImageURI(null);
                         ImageUtils.setPic(binding.outfitPhoto, newUri);
+                        //hide spinner and show new photo now that it's loaded
+                        binding.outfitPhotoProgressBar.setVisibility(View.GONE);
+                        binding.outfitPhoto.setVisibility(View.VISIBLE);
                         newUriLiveData.removeObserver(this);
                     }
                 });
