@@ -31,12 +31,12 @@ public interface OutfitDao {
     @Query("SELECT * FROM outfits WHERE id = :id")
     Outfit getById(int id);
 
-    @Query("SELECT DISTINCT season FROM outfits")
+    @Query("SELECT DISTINCT season FROM outfits WHERE season IS NOT NULL")
     List<String> getDistinctSeasons();
 
-    @Query("SELECT DISTINCT formality FROM outfits")
+    @Query("SELECT DISTINCT formality FROM outfits WHERE formality IS NOT NULL")
     List<String> getDistinctFormalities();
 
-    @Query("SELECT DISTINCT category FROM outfits")
+    @Query("SELECT DISTINCT category FROM outfits WHERE category IS NOT NULL")
     List<String> getDistinctCategories();
 }
