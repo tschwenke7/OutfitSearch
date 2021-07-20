@@ -13,7 +13,11 @@
 
         <action
             android:id="@+id/action_view_specific_outfit"
-            app:destination="@id/ViewOutfitFragment" />
+            app:destination="@id/ViewOutfitFragment"
+            app:enterAnim="@anim/slide_in_right_delayed"
+            app:exitAnim="@anim/slide_out_left_delayed"
+            app:popEnterAnim="@anim/slide_in_left_delayed"
+            app:popExitAnim="@anim/slide_out_right_delayed"/>
         <argument
             android:name="queryString"
             app:argType="string" />
@@ -30,6 +34,11 @@
             android:defaultValue="-1" />
         <action
             android:id="@+id/action_view_outfit_to_browse"
-            app:destination="@id/BrowseFragment" />
+            app:destination="@id/BrowseFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left"
+            />
     </fragment>
 </navigation>
