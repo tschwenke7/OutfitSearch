@@ -1,14 +1,11 @@
 package com.example.outfitsearch.activities.ui.viewoutfit;
 
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,7 +13,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,9 +24,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -47,14 +44,20 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
-public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter.ClothingItemClickListener{
+public class ViewOutfitFragment extends Fragment
+        implements ClothingItemsAdapter.ClothingItemClickListener,
+        AdapterView.OnItemSelectedListener
+{
 
     private FragmentViewOutfitBinding binding;
     private OutfitViewModel outfitViewModel;
     private Outfit currentOutfit;
+    private List<String> seasonOptions;
+    private List<String> formalityOptions;
+    private String TAG = "tom_test";
 
     ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
             uri -> {
@@ -181,6 +184,34 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
                 getContext(), android.R.layout.simple_dropdown_item_1line,
                 outfitViewModel.getAllDistinctClothingItems());
         binding.editTextAddItem.setAdapter(autoCompleteAdapter);
+
+        //setup season spinner
+        seasonOptions = new ArrayList<>();
+        seasonOptions.add(getResources().getString(R.string.no_selection_placeholder));
+        seasonOptions.addAll(outfitViewModel.getDistinctSeasons());
+        seasonOptions.add(getResources().getString(R.string.add_new_spinner_option));
+        binding.spinnerSeason.setAdapter(new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_dropdown_item, seasonOptions));
+        //set selected option to correct option
+        if(currentOutfit.getSeason() != null){
+            binding.spinnerSeason.setSelection(seasonOptions.indexOf(currentOutfit.getSeason()));
+        }
+        //listen to selections
+        binding.spinnerSeason.setOnItemSelectedListener(this);
+
+        //setup formality spinner
+        formalityOptions = new ArrayList<>();
+        formalityOptions.add(getResources().getString(R.string.no_selection_placeholder));
+        formalityOptions.addAll(outfitViewModel.getDistinctFormalities());
+        formalityOptions.add(getResources().getString(R.string.add_new_spinner_option));
+        binding.spinnerFormality.setAdapter(new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_dropdown_item, formalityOptions));
+        //set selected option to correct option
+        if(currentOutfit.getFormality() != null){
+            binding.spinnerFormality.setSelection(formalityOptions.indexOf(currentOutfit.getFormality()));
+        }
+        //listen to selections
+        binding.spinnerFormality.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -261,5 +292,114 @@ public class ViewOutfitFragment extends Fragment implements ClothingItemsAdapter
         if(null != item){
             outfitViewModel.deleteClothingItem(item);
         }
+    }
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+        EditText input = new EditText(requireContext());
+        switch (adapterView.getId()){
+            case R.id.spinner_season:
+                //if it's the first option, that translates to "no options selected" so set to null
+                if(pos == 0){
+                    currentOutfit.setSeason(null);
+                    outfitViewModel.updateOutfit(currentOutfit);
+                }
+                //if the last option, "add new" was selected, we need to prompt to add a new option
+                else if(pos == seasonOptions.size() - 1){
+                    input.setHint(R.string.new_season_hint);
+                    input.setText("");
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.new_season_title)
+                            .setView(input)
+                            .setPositiveButton(R.string.add_button, (dialog, which) -> {
+                                addNewSeason(input.getText().toString());
+                            })
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
+                }
+                //otherwise update outfit with selection
+                else{
+                    currentOutfit.setSeason(seasonOptions.get(pos));
+                    outfitViewModel.updateOutfit(currentOutfit);
+                }
+                break;
+            case R.id.spinner_formality:
+                //if it's the first option, that translates to "no options selected" so set to null
+                if(pos == 0){
+                    currentOutfit.setFormality(null);
+                    outfitViewModel.updateOutfit(currentOutfit);
+                }
+                //if the last option, "add new" was selected, we need to prompt to add a new option
+                else if(pos == formalityOptions.size() - 1){
+                    input.setHint(R.string.new_formality_hint);
+                    input.setText("");
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.new_formality_title)
+                            .setView(input)
+                            .setPositiveButton(R.string.add_button, (dialog, which) -> {
+                                addNewFormality(input.getText().toString());
+                            })
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
+                }
+                //otherwise update outfit with selection
+                else{
+                    currentOutfit.setFormality(formalityOptions.get(pos));
+                    outfitViewModel.updateOutfit(currentOutfit);
+                }
+                break;
+        }
+    }
+
+    private void addNewSeason(String newSeason){
+        //if a value was provided
+        if(!newSeason.isEmpty()){
+            //add the new option to the spinner, if it didn't already exist
+            if(!seasonOptions.contains(newSeason)){
+                //update adapter of spinner
+                seasonOptions = new ArrayList<>();
+                seasonOptions.add(getResources().getString(R.string.no_selection_placeholder));
+                seasonOptions.addAll(outfitViewModel.getDistinctSeasons());
+                seasonOptions.add(newSeason);
+                seasonOptions.add(getResources().getString(R.string.add_new_spinner_option));
+                binding.spinnerSeason.setAdapter(new ArrayAdapter<>(getContext(),
+                        android.R.layout.simple_spinner_dropdown_item, seasonOptions));
+            }
+            //set selection to the new option
+            binding.spinnerSeason.setSelection(seasonOptions.indexOf(newSeason));
+            //this will also call onItemSelected, which will update outfit
+
+//            currentOutfit.setSeason(newSeason);
+//            outfitViewModel.updateOutfit(currentOutfit);
+        }
+    }
+
+    private void addNewFormality(String newFormality){
+        //if a value was provided
+        if(!newFormality.isEmpty()){
+            //add the new option to the spinner, if it didn't already exist
+            if(!formalityOptions.contains(newFormality)){
+                //update adapter of spinner
+                formalityOptions = new ArrayList<>();
+                formalityOptions.add(getResources().getString(R.string.no_selection_placeholder));
+                formalityOptions.addAll(outfitViewModel.getDistinctFormalities());
+                formalityOptions.add(newFormality);
+                formalityOptions.add(getResources().getString(R.string.add_new_spinner_option));
+                binding.spinnerFormality.setAdapter(new ArrayAdapter<>(getContext(),
+                        android.R.layout.simple_spinner_dropdown_item, formalityOptions));
+            }
+            //set selection to the new option
+            binding.spinnerFormality.setSelection(formalityOptions.indexOf(newFormality));
+
+            //update outfit
+            currentOutfit.setFormality(newFormality);
+            outfitViewModel.updateOutfit(currentOutfit);
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        Log.d(TAG, "onNothingSelected: ");
     }
 }

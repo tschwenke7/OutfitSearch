@@ -131,6 +131,30 @@ public class OutfitViewModel extends AndroidViewModel {
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
-        return null;
+        return new String[0];
+    }
+
+    public List<String> getDistinctSeasons(){
+        try {
+            List<String> list = outfitRepository.getDistinctSeasons();
+            //remove any null entries
+            while(list.remove(null));
+            return list;
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    public List<String> getDistinctFormalities(){
+        try {
+            List<String> list = outfitRepository.getDistinctFormalities();
+            //remove any null entries
+            while(list.remove(null));
+            return list;
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 }

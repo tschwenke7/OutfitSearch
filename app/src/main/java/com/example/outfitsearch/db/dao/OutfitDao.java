@@ -30,4 +30,13 @@ public interface OutfitDao {
 
     @Query("SELECT * FROM outfits WHERE id = :id")
     Outfit getById(int id);
+
+    @Query("SELECT DISTINCT season FROM outfits")
+    List<String> getDistinctSeasons();
+
+    @Query("SELECT DISTINCT formality FROM outfits")
+    List<String> getDistinctFormalities();
+
+    @Query("SELECT DISTINCT category FROM outfits")
+    List<String> getDistinctCategories();
 }

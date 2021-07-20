@@ -4,6 +4,7 @@ import android.content.Context;
 import android.telecom.Call;
 
 import androidx.lifecycle.LiveData;
+import androidx.room.Query;
 
 import com.example.outfitsearch.db.dao.ClothingItemDao;
 import com.example.outfitsearch.db.dao.OutfitDao;
@@ -86,8 +87,29 @@ public class OutfitRepository {
     }
 
     public String[] getAllDistinctClothingItems() throws ExecutionException, InterruptedException {
-        Callable<String[]> callable = () -> clothingItemDao.getAllUniqueNames();
+        Callable<String[]> callable = clothingItemDao::getAllUniqueNames;
         Future<String[]> future = OutfitDatabase.databaseWriterExecutor.submit(callable);
+
+        return future.get();
+    }
+
+    public List<String> getDistinctSeasons() throws ExecutionException, InterruptedException {
+        Callable<List<String>> callable = outfitDao::getDistinctSeasons;
+        Future<List<String>> future = OutfitDatabase.databaseWriterExecutor.submit(callable);
+
+        return future.get();
+    }
+
+    public List<String> getDistinctFormalities() throws ExecutionException, InterruptedException {
+        Callable<List<String>> callable = outfitDao::getDistinctFormalities;
+        Future<List<String>> future = OutfitDatabase.databaseWriterExecutor.submit(callable);
+
+        return future.get();
+    }
+
+    public List<String> getDistinctCategories() throws ExecutionException, InterruptedException {
+        Callable<List<String>> callable = outfitDao::getDistinctCategories;
+        Future<List<String>> future = OutfitDatabase.databaseWriterExecutor.submit(callable);
 
         return future.get();
     }
