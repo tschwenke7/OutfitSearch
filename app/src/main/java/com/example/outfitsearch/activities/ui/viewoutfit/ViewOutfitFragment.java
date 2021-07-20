@@ -25,6 +25,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -61,36 +63,19 @@ public class ViewOutfitFragment extends Fragment
 
     ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
             uri -> {
+
                 //get the uri of where this photo will be saved
-                String newFileUriString = saveImage(uri);
-
-                //change the image immediately
-                binding.outfitPhoto.setImageURI(null);
-                binding.outfitPhoto.setImageURI(Uri.parse(newFileUriString));
-
-                //save path to this image in db
-                currentOutfit.setImageUri(newFileUriString);
-                outfitViewModel.updateOutfit(currentOutfit);
+                LiveData<String> newUriLiveData = outfitViewModel.saveImage(currentOutfit, uri);
+                newUriLiveData.observe(getViewLifecycleOwner(), new Observer<String>() {
+                    @Override
+                    public void onChanged(String newUri) {
+                        //change the image immediately
+//                        binding.outfitPhoto.setImageURI(null);
+                        ImageUtils.setPic(binding.outfitPhoto, newUri);
+                        newUriLiveData.removeObserver(this);
+                    }
+                });
             });
-
-    private String saveImage(Uri uri) {
-        try {
-            //get the bitmap from the provided uri
-            Bitmap bitmap = getBitmapFromUri(uri);
-
-            //create/overwrite existing image file for this outfit's image to be saved into
-            File newFile = createImageFile();
-
-            //save the bitmap to the new file
-            saveBitmapToFile(bitmap, newFile);
-
-            //save uri to new photo in db
-            return newFile.getAbsolutePath();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     @Override
     public View onCreateView(
@@ -219,42 +204,6 @@ public class ViewOutfitFragment extends Fragment
         super.onDestroyView();
         binding = null;
     }
-
-    private File createImageFile() {
-        // Create an image file name
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-
-        //get folder to save photo in
-        File folder = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        //create file path
-        String imageFileName = "Outfit_" + currentOutfit.getId() +".jpg";
-
-        //delete existing file if one was there - we should only have one outfit photo
-        File file = new File(folder, imageFileName);
-        if (file.exists()){
-            file.delete();
-        }
-
-        return file;
-    }
-
-    private Bitmap getBitmapFromUri(Uri uri) throws FileNotFoundException {
-        InputStream input = requireContext().getContentResolver().openInputStream(uri);
-        if (input == null) {
-            return null;
-        }
-        return BitmapFactory.decodeStream(input);
-    }
-
-    private File saveBitmapToFile(Bitmap bitmap, File file) throws IOException {
-        FileOutputStream out = new FileOutputStream(file);
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-        out.flush();
-        out.close();
-
-        return file;
-    }
-
 
     @Override
     public void onCreateOptionsMenu(@NonNull @NotNull Menu menu, @NonNull @NotNull MenuInflater inflater) {

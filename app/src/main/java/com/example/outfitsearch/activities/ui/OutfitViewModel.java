@@ -1,6 +1,12 @@
 package com.example.outfitsearch.activities.ui;
 
 import android.app.Application;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
+import android.net.Uri;
+import android.os.Environment;
+import android.telecom.Call;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -8,20 +14,28 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import com.example.outfitsearch.App;
 import com.example.outfitsearch.db.OutfitRepository;
 import com.example.outfitsearch.db.tables.ClothingItem;
 import com.example.outfitsearch.db.tables.Outfit;
+import com.example.outfitsearch.utils.ImageUtils;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 public class OutfitViewModel extends AndroidViewModel {
     private final OutfitRepository outfitRepository;
     private final MutableLiveData<List<Outfit>> allOutfits = new MutableLiveData<>();
+    private final App app;
 
     public OutfitViewModel(@NonNull @NotNull Application application) {
         super(application);
@@ -39,6 +53,7 @@ public class OutfitViewModel extends AndroidViewModel {
             allOutfits.setValue(populatedOutfits);
         };
 
+        app = (App) application;
         outfitRepository.getAllOutfits().observeForever(outfitObserver);
     }
 
@@ -150,5 +165,77 @@ public class OutfitViewModel extends AndroidViewModel {
             e.printStackTrace();
         }
         return new ArrayList<>();
+    }
+
+    public MutableLiveData<String> saveImage(Outfit currentOutfit, Uri uri) {
+        MutableLiveData<String> liveStr = new MutableLiveData<>();
+
+        app.backgroundExecutorService.execute( () -> {
+            //get the bitmap from the provided uri
+            Bitmap bitmap = null;
+            try {
+                bitmap = getBitmapFromUri(uri);
+
+                //create/overwrite existing image file for this outfit's image to be saved into
+                File newFile = createImageFile("Outfit_" + currentOutfit.getId() +".jpg");
+
+                //save the bitmap to the new file
+                saveBitmapToFile(bitmap, newFile);
+
+                //save uri to new photo in db
+                currentOutfit.setImageUri(newFile.getAbsolutePath());
+                updateOutfit(currentOutfit);
+
+                liveStr.postValue(currentOutfit.getImageUri());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                liveStr.postValue(null);
+            }
+        });
+
+        return liveStr;
+    }
+
+    private File createImageFile(String imageFileName) {
+        //get folder to save photo in
+        File folder = app.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        //delete existing file if one was there - we should only have one outfit photo
+        File file = new File(folder, imageFileName);
+        if (file.exists()){
+            file.delete();
+        }
+
+        return file;
+    }
+
+    private Bitmap getBitmapFromUri(Uri uri) throws FileNotFoundException {
+        //find the orientation of the image, in case it needs to be reoriented
+        int orientation = 1;
+        try {
+            InputStream exifChecker = app.getContentResolver().openInputStream(uri);
+            ExifInterface exif = new ExifInterface(exifChecker);
+            orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+            exifChecker.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //read bitmap and reorient if necessary
+        InputStream input = app.getContentResolver().openInputStream(uri);
+        if (input == null) {
+            return null;
+        }
+        return ImageUtils.rotateBitmap(orientation, BitmapFactory.decodeStream(input));
+    }
+
+    private File saveBitmapToFile(Bitmap bitmap, File file) throws IOException {
+        FileOutputStream out = new FileOutputStream(file);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+        out.flush();
+        out.close();
+
+        return file;
     }
 }

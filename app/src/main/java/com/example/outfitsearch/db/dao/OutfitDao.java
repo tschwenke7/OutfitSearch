@@ -39,4 +39,7 @@ public interface OutfitDao {
 
     @Query("SELECT DISTINCT category FROM outfits WHERE category IS NOT NULL")
     List<String> getDistinctCategories();
+
+    @Query("SELECT * FROM outfits WHERE id = :id")
+    LiveData<Outfit> getByIdLive(int id);
 }
