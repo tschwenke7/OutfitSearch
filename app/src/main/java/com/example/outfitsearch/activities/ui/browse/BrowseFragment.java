@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.activities.ui.OutfitViewModel;
-import com.example.outfitsearch.activities.ui.viewoutfit.ViewOutfitFragment;
 import com.example.outfitsearch.databinding.FragmentBrowseBinding;
 
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +43,7 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
         setHasOptionsMenu(true);
 
         RecyclerView outfitRecyclerView = binding.recyclerviewOutfits;
-        final OutfitsAdapter adapter = new OutfitsAdapter(this, getViewLifecycleOwner());
+        final OutfitsAdapter adapter = new OutfitsAdapter(this, getViewLifecycleOwner(), this);
         //if this doesn't work, look here for ref https://stackoverflow.com/questions/42136980/recyclerview-with-rows-and-columns
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireActivity(), GRID_ROW_SIZE);
         outfitRecyclerView.setLayoutManager(layoutManager);

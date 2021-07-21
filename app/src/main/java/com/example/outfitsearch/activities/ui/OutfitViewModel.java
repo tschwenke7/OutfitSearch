@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
-import android.telecom.Call;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -29,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 public class OutfitViewModel extends AndroidViewModel {
@@ -167,14 +165,14 @@ public class OutfitViewModel extends AndroidViewModel {
         return new ArrayList<>();
     }
 
-    public MutableLiveData<String> saveImage(Outfit currentOutfit, Uri uri) {
+    public MutableLiveData<String> saveImage(Outfit currentOutfit, Uri uri, int scaleWidth) {
         MutableLiveData<String> liveStr = new MutableLiveData<>();
 
         app.backgroundExecutorService.execute( () -> {
             //get the bitmap from the provided uri
             Bitmap bitmap = null;
             try {
-                bitmap = getBitmapFromUri(uri);
+                bitmap = getBitmapFromUri(uri, scaleWidth);
 
                 //create/overwrite existing image file for this outfit's image to be saved into
                 File newFile = createImageFile("Outfit_" + currentOutfit.getId() +".jpg");
@@ -210,29 +208,44 @@ public class OutfitViewModel extends AndroidViewModel {
         return file;
     }
 
-    private Bitmap getBitmapFromUri(Uri uri) throws FileNotFoundException {
-        //find the orientation of the image, in case it needs to be reoriented
-        int orientation = 1;
+    private Bitmap getBitmapFromUri(Uri uri, int scaleWidth) throws FileNotFoundException {
         try {
+            //find the orientation of the image, in case it needs to be reoriented
             InputStream exifChecker = app.getContentResolver().openInputStream(uri);
             ExifInterface exif = new ExifInterface(exifChecker);
-            orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
             exifChecker.close();
+
+            //read bitmap from file
+            InputStream input = app.getContentResolver().openInputStream(uri);
+            if (input == null) {
+                return null;
+            }
+
+            Bitmap original = BitmapFactory.decodeStream(input);
+            input.close();
+
+            //scale it to the width of the screen (biggest size we'd ever need) to reduce file size
+            //calculate scale height to keep aspect ratio the same
+            int scaleHeight = (int) (original.getHeight() * ((float) scaleWidth / original.getWidth()) );
+            Bitmap scaled = Bitmap.createScaledBitmap(original, scaleWidth, scaleHeight, true);
+
+            return ImageUtils.rotateBitmap(orientation, scaled);
+
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        //read bitmap and reorient if necessary
-        InputStream input = app.getContentResolver().openInputStream(uri);
-        if (input == null) {
             return null;
         }
-        return ImageUtils.rotateBitmap(orientation, BitmapFactory.decodeStream(input));
     }
 
     private File saveBitmapToFile(Bitmap bitmap, File file) throws IOException {
+        //compress the image as jpg to save space
+        //adjust the quality percent as desired
+        int compressionQualityPercent = 80;
         FileOutputStream out = new FileOutputStream(file);
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, compressionQualityPercent, out);
+
+        //write to the file
         out.flush();
         out.close();
 

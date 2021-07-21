@@ -1,10 +1,8 @@
 package com.example.outfitsearch.activities.ui.viewoutfit;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
+import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,11 +10,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,20 +28,17 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.ObjectKey;
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.activities.ui.OutfitViewModel;
 import com.example.outfitsearch.databinding.FragmentViewOutfitBinding;
 import com.example.outfitsearch.db.tables.ClothingItem;
 import com.example.outfitsearch.db.tables.Outfit;
-import com.example.outfitsearch.utils.ImageUtils;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,31 +54,44 @@ public class ViewOutfitFragment extends Fragment
     private List<String> formalityOptions;
     private String TAG = "tom_test";
 
-    ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
-            uri -> {
-                //make progress bar take up same space as image
-                // by splitting height difference between top and bottom padding
-                int paddingHeight = (binding.outfitPhoto.getHeight() - 176) / 2;
-                binding.outfitPhotoProgressBar.setPadding(0,paddingHeight,
-                        0,paddingHeight);
-                //show progress spinner and hide image while new photo is loading
-                binding.outfitPhotoProgressBar.setVisibility(View.VISIBLE);
-                binding.outfitPhoto.setVisibility(View.GONE);
+    ActivityResultLauncher<String> mGetContent = registerForActivityResult(
+            new ActivityResultContracts.GetContent(), uri -> {
+                if(uri != null){
+                    //make progress bar take up same space as image
+                    // by splitting height difference between top and bottom padding
+                    int paddingHeight = (binding.outfitPhoto.getHeight() - 176) / 2;
+                    binding.outfitPhotoProgressBar.setPadding(0,paddingHeight,
+                            0,paddingHeight);
+                    //show progress spinner and hide image while new photo is loading
+                    binding.outfitPhotoProgressBar.setVisibility(View.VISIBLE);
+                    binding.outfitPhoto.setVisibility(View.GONE);
 
-                //get the uri of where this photo will be saved
-                LiveData<String> newUriLiveData = outfitViewModel.saveImage(currentOutfit, uri);
-                newUriLiveData.observe(getViewLifecycleOwner(), new Observer<String>() {
-                    @Override
-                    public void onChanged(String newUri) {
-                        //change the image immediately
-//                        binding.outfitPhoto.setImageURI(null);
-                        ImageUtils.setPic(binding.outfitPhoto, newUri);
-                        //hide spinner and show new photo now that it's loaded
-                        binding.outfitPhotoProgressBar.setVisibility(View.GONE);
-                        binding.outfitPhoto.setVisibility(View.VISIBLE);
-                        newUriLiveData.removeObserver(this);
-                    }
-                });
+                    //get the uri of where this photo will be saved
+                    DisplayMetrics displayMetrics = new DisplayMetrics();
+                    requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                    LiveData<String> newUriLiveData =
+                            outfitViewModel.saveImage(currentOutfit, uri, displayMetrics.widthPixels);
+                    Fragment fragment = this;
+
+                    newUriLiveData.observe(getViewLifecycleOwner(), new Observer<String>() {
+                        @Override
+                        public void onChanged(String newUri) {
+                            File imageFile = new File(newUri);
+                            //change the image
+//                        ImageUtils.setPic(binding.outfitPhoto, newUri);
+                            Glide.with(fragment)
+                                    .load(newUri)
+                                    .signature(new ObjectKey(imageFile.lastModified()))//clears cache if it has changed
+                                    .placeholder(R.drawable.photo_placeholder)
+                                    .into(binding.outfitPhoto);
+
+                            //hide spinner and show new photo now that it's loaded
+                            binding.outfitPhotoProgressBar.setVisibility(View.GONE);
+                            binding.outfitPhoto.setVisibility(View.VISIBLE);
+                            newUriLiveData.removeObserver(this);
+                        }
+                    });
+                }
             });
 
     @Override
@@ -126,21 +132,12 @@ public class ViewOutfitFragment extends Fragment
 
     private void setupViews(){
         //populate image if applicable
-        String uriString = currentOutfit.getImageUri();
-        //if an image has been provided, scale it to the available viewspace and load
-        //we have to wait for preDrawListener to know how big the view actually is
-        if(uriString != null){
-            ImageView outfitPhoto = binding.outfitPhoto;
-            outfitPhoto.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    ImageUtils.setPic(binding.outfitPhoto, currentOutfit.getImageUri());
-                    outfitPhoto.getViewTreeObserver().removeOnPreDrawListener(this);
-                    return false;
-                }
-            });
-
-        }
+        File imageFile = new File(currentOutfit.getImageUri());
+        Glide.with(this)
+                .load(imageFile)
+                .signature(new ObjectKey(imageFile.lastModified()))
+                .placeholder(R.drawable.photo_placeholder)
+                .into(binding.outfitPhoto);
 
         //setup recyclerview of clothing items
         RecyclerView clothingRecyclerView = binding.recyclerviewClothingItems;
@@ -258,6 +255,8 @@ public class ViewOutfitFragment extends Fragment
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
         EditText input = new EditText(requireContext());
+        input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+
         switch (adapterView.getId()){
             case R.id.spinner_season:
                 //if it's the first option, that translates to "no options selected" so set to null

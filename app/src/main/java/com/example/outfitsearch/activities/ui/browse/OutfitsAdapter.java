@@ -3,22 +3,24 @@ package com.example.outfitsearch.activities.ui.browse;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.ObjectKey;
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.db.tables.ClothingItem;
 import com.example.outfitsearch.db.tables.Outfit;
-import com.example.outfitsearch.utils.ImageUtils;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.List;
 
 public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHolder> {
@@ -26,10 +28,12 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
     private List<Outfit> outfits;
     private final OutfitClickListener outfitClickListener;
     private LifecycleOwner lifecycleOwner;
+    private Fragment parentFragment;
 
-    public OutfitsAdapter(OutfitClickListener outfitClickListener, LifecycleOwner lifecycleOwner) {
+    public OutfitsAdapter(OutfitClickListener outfitClickListener, LifecycleOwner lifecycleOwner, Fragment parentFragment) {
         this.outfitClickListener = outfitClickListener;
         this.lifecycleOwner = lifecycleOwner;
+        this.parentFragment = parentFragment;
     }
 
     @NonNull
@@ -113,21 +117,15 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
         }
 
         public void bind(Outfit outfit){
+            //todo add recyclerview specific preloader - http://bumptech.github.io/glide/int/recyclerview.html
             //set thumbnail image if provided
-            //we need to wait until the imageView has been assigned a size before we
-            // scale and load the image to be placed in it.
-            String uri = outfit.getImageUri();
             ImageView imageView = itemView.findViewById(R.id.imageview_outfit_thumbnail);
-            if(null != uri){
-                imageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        ImageUtils.setPic(imageView, uri);
-                        imageView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        return false;
-                    }
-                });
-            }
+            File imageFile = new File(outfit.getImageUri());
+            Glide.with(parentFragment)
+                    .load(imageFile)
+                    .signature(new ObjectKey(imageFile.lastModified()))
+                    .placeholder(R.drawable.photo_placeholder)
+                    .into(imageView);
 
             //set textbox listing clothing items, and make it update if their are changes
             outfit.getClothingItems().observe(lifecycleOwner, (clothingItems -> {
