@@ -1,10 +1,8 @@
 package com.example.outfitsearch.db;
 
 import android.content.Context;
-import android.telecom.Call;
 
 import androidx.lifecycle.LiveData;
-import androidx.room.Query;
 
 import com.example.outfitsearch.db.dao.ClothingItemDao;
 import com.example.outfitsearch.db.dao.OutfitDao;

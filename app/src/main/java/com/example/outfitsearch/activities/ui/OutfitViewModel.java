@@ -165,7 +165,8 @@ public class OutfitViewModel extends AndroidViewModel {
         return new ArrayList<>();
     }
 
-    public MutableLiveData<String> saveImage(Outfit currentOutfit, Uri uri, int scaleWidth) {
+    public MutableLiveData<String> saveImage(Outfit currentOutfit, Uri uri, int scaleWidth,
+                                             boolean deleteSourceOnFinish) {
         MutableLiveData<String> liveStr = new MutableLiveData<>();
 
         app.backgroundExecutorService.execute( () -> {
@@ -185,6 +186,12 @@ public class OutfitViewModel extends AndroidViewModel {
                 updateOutfit(currentOutfit);
 
                 liveStr.postValue(currentOutfit.getImageUri());
+
+                //delete source file if requested now that we are done with it
+                if(deleteSourceOnFinish){
+                    File usedTempFile = new File(uri.toString());
+                    usedTempFile.delete();
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();

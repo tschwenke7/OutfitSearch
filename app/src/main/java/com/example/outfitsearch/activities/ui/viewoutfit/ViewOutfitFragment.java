@@ -1,6 +1,11 @@
 package com.example.outfitsearch.activities.ui.viewoutfit;
 
+import android.Manifest;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -20,6 +25,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -39,7 +46,10 @@ import com.example.outfitsearch.db.tables.Outfit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ViewOutfitFragment extends Fragment
@@ -53,46 +63,81 @@ public class ViewOutfitFragment extends Fragment
     private List<String> seasonOptions;
     private List<String> formalityOptions;
     private String TAG = "tom_test";
+    private Uri tempPhotoUri;
 
     ActivityResultLauncher<String> mGetContent = registerForActivityResult(
-            new ActivityResultContracts.GetContent(), uri -> {
-                if(uri != null){
-                    //make progress bar take up same space as image
-                    // by splitting height difference between top and bottom padding
-                    int paddingHeight = (binding.outfitPhoto.getHeight() - 176) / 2;
-                    binding.outfitPhotoProgressBar.setPadding(0,paddingHeight,
-                            0,paddingHeight);
-                    //show progress spinner and hide image while new photo is loading
-                    binding.outfitPhotoProgressBar.setVisibility(View.VISIBLE);
-                    binding.outfitPhoto.setVisibility(View.GONE);
+        new ActivityResultContracts.GetContent(), uri -> {
+            if(uri != null){
+                saveOutfitImageFrom(uri, false);
+            }
+        });
 
-                    //get the uri of where this photo will be saved
-                    DisplayMetrics displayMetrics = new DisplayMetrics();
-                    requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                    LiveData<String> newUriLiveData =
-                            outfitViewModel.saveImage(currentOutfit, uri, displayMetrics.widthPixels);
-                    Fragment fragment = this;
+    ActivityResultLauncher<Uri> mTakePicture = registerForActivityResult(
+            new ActivityResultContracts.TakePicture(), success -> {
+        if (success) {
+            saveOutfitImageFrom(tempPhotoUri, true);
+        }
+    });
 
-                    newUriLiveData.observe(getViewLifecycleOwner(), new Observer<String>() {
-                        @Override
-                        public void onChanged(String newUri) {
-                            File imageFile = new File(newUri);
-                            //change the image
-//                        ImageUtils.setPic(binding.outfitPhoto, newUri);
-                            Glide.with(fragment)
-                                    .load(newUri)
-                                    .signature(new ObjectKey(imageFile.lastModified()))//clears cache if it has changed
-                                    .placeholder(R.drawable.photo_placeholder)
-                                    .into(binding.outfitPhoto);
-
-                            //hide spinner and show new photo now that it's loaded
-                            binding.outfitPhotoProgressBar.setVisibility(View.GONE);
-                            binding.outfitPhoto.setVisibility(View.VISIBLE);
-                            newUriLiveData.removeObserver(this);
-                        }
+    ActivityResultLauncher<String> mGetCameraPermission = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), success -> {
+        if(success){
+            //get a temporary file for camera to save to
+            tempPhotoUri = generateTempPhotoUri();
+            //launch camera to take a photo
+            if(tempPhotoUri != null) {
+                mTakePicture.launch(tempPhotoUri);
+            }
+        }
+        //if permission was denied, display a message to the user explaining the consequences
+        else{
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setMessage(R.string.camera_permission_denied_message)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.ok, (dialog, id) -> {
+                        //do things
                     });
-                }
-            });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+    });
+
+    private void saveOutfitImageFrom(Uri uri, boolean deleteSourceOnFinish){
+        //make progress bar take up same space as image
+        // by splitting height difference between top and bottom padding
+        int paddingHeight = (binding.outfitPhoto.getHeight() - 176) / 2;
+        binding.outfitPhotoProgressBar.setPadding(0,paddingHeight,
+                0,paddingHeight);
+        //show progress spinner and hide image while new photo is loading
+        binding.outfitPhotoProgressBar.setVisibility(View.VISIBLE);
+        binding.outfitPhoto.setVisibility(View.GONE);
+
+        //get the uri of where this photo will be saved
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        LiveData<String> newUriLiveData =
+                outfitViewModel.saveImage(currentOutfit, uri, displayMetrics.widthPixels, deleteSourceOnFinish);
+        Fragment fragment = this;
+
+        newUriLiveData.observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String newUri) {
+                File imageFile = new File(newUri);
+                //change the image
+//                        ImageUtils.setPic(binding.outfitPhoto, newUri);
+                Glide.with(fragment)
+                        .load(newUri)
+                        .signature(new ObjectKey(imageFile.lastModified()))//clears cache if it has changed
+                        .placeholder(R.drawable.photo_placeholder)
+                        .into(binding.outfitPhoto);
+
+                //hide spinner and show new photo now that it's loaded
+                binding.outfitPhotoProgressBar.setVisibility(View.GONE);
+                binding.outfitPhoto.setVisibility(View.VISIBLE);
+                newUriLiveData.removeObserver(this);
+            }
+        });
+    }
 
     @Override
     public View onCreateView(
@@ -149,16 +194,23 @@ public class ViewOutfitFragment extends Fragment
         //setup buttons
         binding.buttonChoosePhoto.setOnClickListener(v -> mGetContent.launch("image/*"));
 
-//        binding.buttonTakePhoto.setOnClickListener(v -> {
-//            File photoFile = null;
-//            photoFile = createImageFile();
-//
-//            if (photoFile != null){
-//                Uri photoURI = FileProvider.getUriForFile(this.requireContext(),
-//                        "com.example.android.fileprovider",
-//                        photoFile);
-//            }
-//        });
+        binding.buttonTakePhoto.setOnClickListener(v -> {
+
+            //generate a temp file for the camera app to save into
+            tempPhotoUri = generateTempPhotoUri();
+            //if it was successful
+            if (tempPhotoUri != null){
+                //check if we need to ask for permission to use the camera
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+                        == PackageManager.PERMISSION_DENIED){
+                    mGetCameraPermission.launch(Manifest.permission.CAMERA);
+                }
+                //launch camera app to take a picture for us
+                else{
+                    mTakePicture.launch(tempPhotoUri);
+                }
+            }
+        });
 
         //setup listener to add new clothing item
         binding.buttonAddItem.setOnClickListener((view) -> {
@@ -205,6 +257,28 @@ public class ViewOutfitFragment extends Fragment
         }
         //listen to selections
         binding.spinnerFormality.setOnItemSelectedListener(this);
+    }
+
+    private Uri generateTempPhotoUri() {
+        try{
+            // Create an image file name
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String imageFileName = "JPEG_" + timeStamp + "_";
+            File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File image = File.createTempFile(
+                    imageFileName,  /* prefix */
+                    ".jpg",         /* suffix */
+                    storageDir      /* directory */
+            );
+            image.deleteOnExit();
+
+            // Save a file: path for use with ACTION_VIEW intents
+            return FileProvider.getUriForFile(requireContext(),
+                    getActivity().getApplicationContext().getPackageName() + ".provider", image);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
