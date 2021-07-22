@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -72,7 +73,7 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
         });
 
         /* setup search bar */
-        AutoCompleteTextView searchBar = binding.searchBar;
+        MultiAutoCompleteTextView searchBar = binding.searchBar;
 
         //configure searchbar to not allow newline character entries, but still allow wrapping
         //over multiple lines
@@ -109,6 +110,8 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
         ArrayAdapter<String> searchBarAdapter = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_dropdown_item_1line, outfitViewModel.getAllDistinctClothingItems());
         searchBar.setAdapter(searchBarAdapter);
+        //configure autocomplete to consider comma separated phrases as separate tokens
+        searchBar.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
     }
 
