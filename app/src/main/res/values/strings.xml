@@ -39,5 +39,7 @@
     <string name="camera_permission_denied_message">Since you have denied camera permission, you will be unable to use the camera from this app.\n
         You can still choose existing images from the gallery using the "BROWSE" button, or modify this permission later from your Settings app.</string>
     <string name="ok">Ok</string>
+    <string name="outfit_search_hint">Enter one or more keywords to match clothing items, separated by commas.</string>
+    <string name="search_filters_heading">Filter outfits by</string>
 
 </resources>

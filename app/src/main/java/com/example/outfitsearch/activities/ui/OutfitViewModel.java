@@ -45,6 +45,8 @@ public class OutfitViewModel extends AndroidViewModel {
             List<Outfit> populatedOutfits = new ArrayList<>();
             for (Outfit outfit : outfits) {
                 outfit.setClothingItems(getClothesForOutfit(outfit.getId()));
+                //update non-LiveData version when changes detected
+                outfit.getClothingItems().observeForever(outfit::setLatestClothingItems);
                 populatedOutfits.add(outfit);
             }
 

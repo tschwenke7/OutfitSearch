@@ -94,9 +94,7 @@ public class ViewOutfitFragment extends Fragment
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setMessage(R.string.camera_permission_denied_message)
                     .setCancelable(false)
-                    .setPositiveButton(R.string.ok, (dialog, id) -> {
-                        //do things
-                    });
+                    .setPositiveButton(R.string.ok, (dialog, id) -> {});
             AlertDialog alert = builder.create();
             alert.show();
         }

@@ -3,6 +3,8 @@ package com.example.outfitsearch.activities.ui.browse;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,11 +23,14 @@ import com.example.outfitsearch.db.tables.Outfit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHolder> {
+public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHolder> implements Filterable {
 
     private List<Outfit> outfits;
+    private List<Outfit> outfitsFull;
     private final OutfitClickListener outfitClickListener;
     private LifecycleOwner lifecycleOwner;
     private Fragment parentFragment;
@@ -68,6 +73,87 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OutfitDiff(newList, outfits));
         diffResult.dispatchUpdatesTo(this);
         outfits = newList;
+        outfitsFull = new ArrayList<>(newList);
+    }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    private Filter filter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Outfit> filteredList = new ArrayList<>();
+
+            if(constraint == null || constraint.length() == 0){
+                //if recipes haven't finished loading yet, wait until they have
+                while (outfitsFull == null){
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                filteredList.addAll(outfitsFull);
+            }
+            else{
+                //read and split up the query string into separate items split by commas
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                String[] itemsToMatch = filterPattern.split(",");
+
+                //trim item names
+                for (int i = 0; i < itemsToMatch.length; i++){
+                    itemsToMatch[i] = itemsToMatch[i].trim();
+                }
+
+                //find all outfits who have clothing items matching all components of the query string
+                for (Outfit outfit : outfitsFull){
+                    //this array maintains which ingredients have been matched
+                    // as we iterate through the list of clothing items
+                    boolean[] found = new boolean[itemsToMatch.length];
+
+
+                    //loop through each clothing item of the outfit, and try to match against each query
+                    for (ClothingItem clothingItem : outfit.getLatestClothingItems()){
+                        int i = 0;
+                        String itemNameLowerCase = clothingItem.getName().toLowerCase();
+                        //loop through each item to match that hasn't yet been matched by this outfit
+                        while (!isAllTrue(found) && i < itemsToMatch.length) {
+                            if(!found[i] && itemNameLowerCase.contains(itemsToMatch[i])){
+                                found[i] = true;
+                            }
+                            i++;
+                        }
+                    }
+
+                    //add this outfit to the list if all itemsToMatch were found within its items
+                    if(isAllTrue(found)){
+                        filteredList.add(outfit);
+                    }
+                }
+            }
+
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            outfits.clear();
+            if (results.values != null) {
+                outfits.addAll((List) results.values);
+            }
+            notifyDataSetChanged();
+        }
+    };
+
+    private boolean isAllTrue(boolean... array){
+        for (boolean b: array){
+            if(!b) return false;
+        }
+        return true;
     }
 
     private class OutfitDiff extends DiffUtil.Callback {

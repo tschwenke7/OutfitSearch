@@ -14,14 +14,75 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="1dp" />
+        android:iconifiedByDefault="false"
+        android:background="@drawable/searchview_backgroud"
+        />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_category_spinners"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
+        <TextView
+            android:id="@+id/filters_heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="@string/search_filters_heading"
+            style="@style/normalText"/>
+
+        <TextView
+            android:id="@+id/season_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:text="@string/season_label"
+            style="@style/miniHeading"
+            app:layout_constraintEnd_toStartOf="@+id/formality_label"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/filters_heading" />
+
+        <TextView
+            android:id="@+id/formality_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="@string/formality_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/season_label"
+            app:layout_constraintTop_toTopOf="@id/season_label" />
+
+        <Spinner
+            android:id="@+id/spinner_season"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+
+            android:layout_marginEnd="4dp"
+            app:layout_constraintEnd_toStartOf="@+id/spinner_formality"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/season_label" />
+
+        <Spinner
+            android:id="@+id/spinner_formality"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner_season"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/spinner_season"
+            app:layout_constraintTop_toTopOf="@+id/spinner_season" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ProgressBar
         android:id="@+id/loading_spinner"
         style="?android:attr/progressBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_outfits"

@@ -31,6 +31,9 @@ public class Outfit {
     @Ignore
     private LiveData<List<ClothingItem>> clothingItems;
 
+    @Ignore
+    private List<ClothingItem> latestClothingItems;
+
     public Outfit() {
     }
 
@@ -88,6 +91,14 @@ public class Outfit {
 
     public void setClothingItems(LiveData<List<ClothingItem>> clothingItems) {
         this.clothingItems = clothingItems;
+    }
+
+    public List<ClothingItem> getLatestClothingItems() {
+        return latestClothingItems;
+    }
+
+    public void setLatestClothingItems(List<ClothingItem> latestClothingItems) {
+        this.latestClothingItems = latestClothingItems;
     }
 
     @Override

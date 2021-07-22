@@ -1,5 +1,6 @@
 package com.example.outfitsearch.activities.ui.browse;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -7,6 +8,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -41,24 +43,47 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
+        setupViews();
+//        outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> outfitViewModel.clearAllOutfits());
 
+    }
+
+    private void setupViews() {
+        //setup outfit recyclerview
         RecyclerView outfitRecyclerView = binding.recyclerviewOutfits;
         final OutfitsAdapter adapter = new OutfitsAdapter(this, getViewLifecycleOwner(), this);
-        //if this doesn't work, look here for ref https://stackoverflow.com/questions/42136980/recyclerview-with-rows-and-columns
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireActivity(), GRID_ROW_SIZE);
         outfitRecyclerView.setLayoutManager(layoutManager);
         outfitRecyclerView.setAdapter(adapter);
 
-
-
         //observe all outfits
         outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> {
             adapter.setList(list);
+            //hide loading spinner once outfits are loaded
             binding.loadingSpinner.setVisibility(View.GONE);
             binding.recyclerviewOutfits.setVisibility(View.VISIBLE);
         });
-//        outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> outfitViewModel.clearAllOutfits());
 
+        //setup search bar
+        //setup search bar
+        SearchView searchView = binding.searchBar;
+        //hide default underline style of searchview
+        int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
+        View searchPlate = searchView.findViewById(searchPlateId);
+        searchPlate.setBackgroundColor(Color.TRANSPARENT);
+        //have it listen and update results in realtime as the user types
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
     }
 
     @Override
