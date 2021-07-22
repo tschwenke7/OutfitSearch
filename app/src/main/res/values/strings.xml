@@ -42,5 +42,6 @@
     <string name="outfit_search_hint">Enter one or more keywords to match clothing items, separated by commas.</string>
     <string name="search_filters_heading">Filter outfits by</string>
     <string name="search_bar_hint">Find outfits using this clothing item/s…</string>
+    <string name="all_spinner_option">All</string>
 
 </resources>

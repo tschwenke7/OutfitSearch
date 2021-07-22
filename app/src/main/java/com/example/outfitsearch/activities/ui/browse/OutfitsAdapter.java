@@ -33,6 +33,8 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
     private final OutfitClickListener outfitClickListener;
     private LifecycleOwner lifecycleOwner;
     private Fragment parentFragment;
+    private String matchSeason;
+    private String matchFormality;
 
     public OutfitsAdapter(OutfitClickListener outfitClickListener, LifecycleOwner lifecycleOwner, Fragment parentFragment) {
         this.outfitClickListener = outfitClickListener;
@@ -82,18 +84,42 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
     private Filter filter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
-            List<Outfit> filteredList = new ArrayList<>();
+            List<Outfit> finalFilteredList = new ArrayList<>();
 
-            if(constraint == null || constraint.length() == 0){
-                //if recipes haven't finished loading yet, wait until they have
-                while (outfitsFull == null){
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+            //if recipes haven't finished loading yet, wait until they have
+            while (outfitsFull == null){
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //first, filter all outfits that don't meet the season and formality filters set, if applicable
+            //if the filter values are null, that means any value is allowed
+            List<Outfit> categoricallyFilteredList = new ArrayList<>();
+
+            //skip this step to save time if all categories are null
+            if ((matchFormality == null && matchSeason == null)){
+                categoricallyFilteredList = outfitsFull;
+            }
+            else{
+                for (Outfit outfit : outfitsFull) {
+                    if (
+                        (matchSeason == null || matchSeason.equals(outfit.getSeason())) &&
+                        (matchFormality == null || matchFormality.equals(outfit.getFormality()))
+                    ){
+                        categoricallyFilteredList.add(outfit);
                     }
                 }
-                filteredList.addAll(outfitsFull);
+            }
+
+
+            //secondly, search through the remaining outfits to find those
+            //which have clothing items matching all components of the query string
+            if(constraint == null || constraint.length() == 0){
+                //if the query string is empty, simply add all
+                finalFilteredList.addAll(categoricallyFilteredList);
             }
             else{
                 //read and split up the query string into separate items split by commas
@@ -105,20 +131,20 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
                     itemsToMatch[i] = itemsToMatch[i].trim();
                 }
 
-                //find all outfits who have clothing items matching all components of the query string
-                for (Outfit outfit : outfitsFull){
-                    //this array maintains which ingredients have been matched
-                    // as we iterate through the list of clothing items
+                //find all outfits which match the search criteria
+                for (Outfit outfit : categoricallyFilteredList) {
+                    //this array maintains which query components have been matched
+                    //as we iterate through them
                     boolean[] found = new boolean[itemsToMatch.length];
 
-
-                    //loop through each clothing item of the outfit, and try to match against each query
-                    for (ClothingItem clothingItem : outfit.getLatestClothingItems()){
+                    //loop through each clothing item of the outfit,
+                    //and try to match against each thus far unfound query component
+                    for (ClothingItem clothingItem : outfit.getLatestClothingItems()) {
                         int i = 0;
                         String itemNameLowerCase = clothingItem.getName().toLowerCase();
                         //loop through each item to match that hasn't yet been matched by this outfit
                         while (!isAllTrue(found) && i < itemsToMatch.length) {
-                            if(!found[i] && itemNameLowerCase.contains(itemsToMatch[i])){
+                            if (!found[i] && itemNameLowerCase.contains(itemsToMatch[i])) {
                                 found[i] = true;
                             }
                             i++;
@@ -126,14 +152,14 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
                     }
 
                     //add this outfit to the list if all itemsToMatch were found within its items
-                    if(isAllTrue(found)){
-                        filteredList.add(outfit);
+                    if (isAllTrue(found)) {
+                        finalFilteredList.add(outfit);
                     }
                 }
             }
 
             FilterResults results = new FilterResults();
-            results.values = filteredList;
+            results.values = finalFilteredList;
 
             return results;
         }
@@ -153,6 +179,14 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
             if(!b) return false;
         }
         return true;
+    }
+
+    public void setMatchSeason(String matchSeason) {
+        this.matchSeason = matchSeason;
+    }
+
+    public void setMatchFormality(String matchFormality) {
+        this.matchFormality = matchFormality;
     }
 
     private class OutfitDiff extends DiffUtil.Callback {

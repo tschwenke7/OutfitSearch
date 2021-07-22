@@ -1,21 +1,17 @@
 package com.example.outfitsearch.activities.ui.browse;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.MultiAutoCompleteTextView;
-import android.widget.SearchView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -31,11 +27,19 @@ import com.example.outfitsearch.utils.KeyboardHider;
 
 import org.jetbrains.annotations.NotNull;
 
-public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitClickListener{
+import java.util.ArrayList;
+import java.util.List;
+
+public class BrowseFragment extends Fragment implements
+        OutfitsAdapter.OutfitClickListener,
+        AdapterView.OnItemSelectedListener {
 
     private FragmentBrowseBinding binding;
     private OutfitViewModel outfitViewModel;
     private final int GRID_ROW_SIZE = 2;
+    private List<String> seasonOptions;
+    private List<String> formalityOptions;
+    private OutfitsAdapter outfitsAdapter;
 
     @Override
     public View onCreateView(
@@ -59,14 +63,14 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
     private void setupViews() {
         //setup outfit recyclerview
         RecyclerView outfitRecyclerView = binding.recyclerviewOutfits;
-        final OutfitsAdapter adapter = new OutfitsAdapter(this, getViewLifecycleOwner(), this);
+        outfitsAdapter = new OutfitsAdapter(this, getViewLifecycleOwner(), this);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireActivity(), GRID_ROW_SIZE);
         outfitRecyclerView.setLayoutManager(layoutManager);
-        outfitRecyclerView.setAdapter(adapter);
+        outfitRecyclerView.setAdapter(outfitsAdapter);
 
         //observe all outfits
         outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> {
-            adapter.setList(list);
+            outfitsAdapter.setList(list);
             //hide loading spinner once outfits are loaded
             binding.loadingSpinner.setVisibility(View.GONE);
             binding.recyclerviewOutfits.setVisibility(View.VISIBLE);
@@ -90,7 +94,7 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
+                outfitsAdapter.getFilter().filter(s);
             }
 
             @Override
@@ -113,6 +117,28 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
         //configure autocomplete to consider comma separated phrases as separate tokens
         searchBar.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
+        /* Setup category drop down spinners */
+        //setup season spinner
+        seasonOptions = new ArrayList<>();
+        seasonOptions.add(getResources().getString(R.string.all_spinner_option));
+        seasonOptions.addAll(outfitViewModel.getDistinctSeasons());
+
+        binding.spinnerSeason.setAdapter(new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_dropdown_item, seasonOptions));
+
+        //listen to selections
+        binding.spinnerSeason.setOnItemSelectedListener(this);
+
+        //setup formality spinner
+        formalityOptions = new ArrayList<>();
+        formalityOptions.add(getResources().getString(R.string.all_spinner_option));
+        formalityOptions.addAll(outfitViewModel.getDistinctFormalities());
+
+        binding.spinnerFormality.setAdapter(new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_dropdown_item, formalityOptions));
+
+        //listen to selections
+        binding.spinnerFormality.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -147,4 +173,37 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
         action.setOutfitId(outfitViewModel.getAllOutfits().getValue().get(position).getId());
         Navigation.findNavController(requireView()).navigate(action);
     }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+        switch (adapterView.getId()){
+            case R.id.spinner_season:
+                //if it's the first option, that translates to "allow all" so set to null
+                if(pos == 0){
+                    outfitsAdapter.setMatchSeason(null);
+                }
+                //otherwise tell adapter to filter by the selected season
+                else{
+                    outfitsAdapter.setMatchSeason(seasonOptions.get(pos));
+                }
+                break;
+            case R.id.spinner_formality:
+                //if it's the first option, that translates to "allow all" so set to null
+                if(pos == 0){
+                    outfitsAdapter.setMatchFormality(null);
+                }
+                //otherwise tell adapter to filter by the selected formality
+                else{
+                    outfitsAdapter.setMatchFormality(formalityOptions.get(pos));
+                }
+                break;
+        }
+        //after updating the filter categories, we should call filter again on the current query
+        //to update the results
+        String currentQuery = binding.searchBar.getText().toString();
+        outfitsAdapter.getFilter().filter(currentQuery);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {}
 }
