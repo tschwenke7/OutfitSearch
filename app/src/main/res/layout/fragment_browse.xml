@@ -9,13 +9,21 @@
     android:orientation="vertical"
     android:layout_margin="@dimen/default_margin">
 
-    <SearchView
+    <AutoCompleteTextView
         android:id="@+id/search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:iconifiedByDefault="false"
         android:background="@drawable/searchview_backgroud"
+        android:drawableStart="@drawable/search_icon_24"
+        android:padding="12dp"
+        android:drawablePadding="4dp"
+        android:hint="@string/search_bar_hint"
+        android:imeOptions="actionSearch"
+        android:inputType="textAutoCorrect"
+        tools:text="fniuewieuhiewrwucfiwehcwencfgwencfgiwecnfgiwucnfiewcniwwnefuwiancf"
+        android:maxLines="5"
+        android:completionThreshold="1"
         />
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_category_spinners"

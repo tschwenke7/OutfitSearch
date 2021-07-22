@@ -1,7 +1,6 @@
 package com.example.outfitsearch.activities.ui.viewoutfit;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -46,7 +45,6 @@ import com.example.outfitsearch.db.tables.Outfit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;

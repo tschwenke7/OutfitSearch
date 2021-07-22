@@ -2,13 +2,19 @@ package com.example.outfitsearch.activities.ui.browse;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -20,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.activities.ui.OutfitViewModel;
 import com.example.outfitsearch.databinding.FragmentBrowseBinding;
+import com.example.outfitsearch.utils.KeyboardHider;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -64,26 +71,45 @@ public class BrowseFragment extends Fragment implements OutfitsAdapter.OutfitCli
             binding.recyclerviewOutfits.setVisibility(View.VISIBLE);
         });
 
-        //setup search bar
-        //setup search bar
-        SearchView searchView = binding.searchBar;
-        //hide default underline style of searchview
-        int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
-        View searchPlate = searchView.findViewById(searchPlateId);
-        searchPlate.setBackgroundColor(Color.TRANSPARENT);
+        /* setup search bar */
+        AutoCompleteTextView searchBar = binding.searchBar;
+
+        //configure searchbar to not allow newline character entries, but still allow wrapping
+        //over multiple lines
+        searchBar.setSingleLine(true);
+        searchBar.setHorizontallyScrolling(false);
+        searchBar.setMaxLines(20);
+
         //have it listen and update results in realtime as the user types
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        searchBar.addTextChangedListener(new TextWatcher() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                adapter.getFilter().filter(newText);
-                return false;
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
+
+        //hide keyboard when enter key pressed when using searchbar, so user can see the results
+        searchBar.setOnEditorActionListener((v, actionId, event) -> {
+            KeyboardHider.hideKeyboard(requireActivity());
+            v.clearFocus();
+            return false;
+        });
+
+        //setup autocomplete on the searchbar
+        ArrayAdapter<String> searchBarAdapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_dropdown_item_1line, outfitViewModel.getAllDistinctClothingItems());
+        searchBar.setAdapter(searchBarAdapter);
+
     }
 
     @Override

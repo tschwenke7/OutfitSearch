@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHolder> implements Filterable {
 
