@@ -1,6 +1,7 @@
 package com.example.outfitsearch.activities.ui.browse;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -18,11 +19,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.activities.ui.OutfitViewModel;
 import com.example.outfitsearch.databinding.FragmentBrowseBinding;
+import com.example.outfitsearch.db.tables.Outfit;
 import com.example.outfitsearch.utils.KeyboardHider;
 
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +35,7 @@ import java.util.List;
 
 public class BrowseFragment extends Fragment implements
         OutfitsAdapter.OutfitClickListener,
+        SwipeToPassCallback.OutfitSwipeListener,
         AdapterView.OnItemSelectedListener {
 
     private FragmentBrowseBinding binding;
@@ -60,7 +64,7 @@ public class BrowseFragment extends Fragment implements
     }
 
     private void setupViews() {
-        //setup outfit recyclerview
+        /* setup outfit recyclerview */
         RecyclerView outfitRecyclerView = binding.recyclerviewOutfits;
         outfitsAdapter = new OutfitsAdapter(this, getViewLifecycleOwner(), this);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireActivity(), GRID_ROW_SIZE);
@@ -69,13 +73,17 @@ public class BrowseFragment extends Fragment implements
 
         //observe all outfits
         outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> {
+            //if there are no outfits, show a message telling the user to add some
             if(list.isEmpty()){
                 binding.textviewNoResults.setVisibility(View.VISIBLE);
                 binding.textviewNoResults.setText(R.string.no_outfits_exist);
             }
+            //otherwise set the list to the adapter
             else{
                 binding.textviewNoResults.setVisibility(View.GONE);
+                Parcelable recyclerViewState = outfitRecyclerView.getLayoutManager().onSaveInstanceState();
                 outfitsAdapter.setList(list);
+                outfitRecyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
             }
 
             //hide loading spinner once outfits are loaded
@@ -117,6 +125,11 @@ public class BrowseFragment extends Fragment implements
                 }
             }
         });
+
+        //add itemTouchListener to detect outfit swipes
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
+                new SwipeToPassCallback(outfitsAdapter, this));
+        itemTouchHelper.attachToRecyclerView(outfitRecyclerView);
 
         /* setup search bar */
         MultiAutoCompleteTextView searchBar = binding.searchBar;
@@ -248,4 +261,14 @@ public class BrowseFragment extends Fragment implements
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {}
+
+    /**
+     * Respond to outfit swipes by sending the outfit to the back of the viewQueue (making it end
+     * up at the bottom of browsing).
+     * @param outfit
+     */
+    @Override
+    public void onItemSwiped(Outfit outfit) {
+        outfitViewModel.sendToBackOfViewQueue(outfit);
+    }
 }

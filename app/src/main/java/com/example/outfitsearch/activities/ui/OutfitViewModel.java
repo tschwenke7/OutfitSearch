@@ -260,4 +260,17 @@ public class OutfitViewModel extends AndroidViewModel {
 
         return file;
     }
+
+    /** Sets the viewQueueIndex of this outfit to 1 higher than the current highest value,
+     * sending the outfit to the end of the viewing order.
+     * @param outfit - the outfit to be sent to the back of the viewQueue
+     */
+    public void sendToBackOfViewQueue(Outfit outfit) {
+        try {
+            outfit.setViewQueueIndex(outfitRepository.getLastViewQueueIndex() + 1);
+            outfitRepository.updateOutfit(outfit);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
