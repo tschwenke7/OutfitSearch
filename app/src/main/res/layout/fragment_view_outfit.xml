@@ -27,7 +27,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
                 android:text="@string/season_label"
-                style="@style/miniHeading"
                 app:layout_constraintEnd_toStartOf="@+id/formality_label"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"

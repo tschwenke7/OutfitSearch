@@ -173,12 +173,14 @@ public class ViewOutfitFragment extends Fragment
 
     private void setupViews(){
         //populate image if applicable
-        File imageFile = new File(currentOutfit.getImageUri());
-        Glide.with(this)
-                .load(imageFile)
-                .signature(new ObjectKey(imageFile.lastModified()))
-                .placeholder(R.drawable.photo_placeholder)
-                .into(binding.outfitPhoto);
+        if (currentOutfit.getImageUri() != null){
+            File imageFile = new File(currentOutfit.getImageUri());
+            Glide.with(this)
+                    .load(imageFile)
+                    .signature(new ObjectKey(imageFile.lastModified()))
+                    .placeholder(R.drawable.photo_placeholder)
+                    .into(binding.outfitPhoto);
+        }
 
         //setup recyclerview of clothing items
         RecyclerView clothingRecyclerView = binding.recyclerviewClothingItems;

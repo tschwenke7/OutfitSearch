@@ -57,7 +57,6 @@ public class BrowseFragment extends Fragment implements
         setHasOptionsMenu(true);
         setupViews();
 //        outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> outfitViewModel.clearAllOutfits());
-
     }
 
     private void setupViews() {
@@ -70,10 +69,53 @@ public class BrowseFragment extends Fragment implements
 
         //observe all outfits
         outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> {
-            outfitsAdapter.setList(list);
+            if(list.isEmpty()){
+                binding.textviewNoResults.setVisibility(View.VISIBLE);
+                binding.textviewNoResults.setText(R.string.no_outfits_exist);
+            }
+            else{
+                binding.textviewNoResults.setVisibility(View.GONE);
+                outfitsAdapter.setList(list);
+            }
+
             //hide loading spinner once outfits are loaded
             binding.loadingSpinner.setVisibility(View.GONE);
             binding.recyclerviewOutfits.setVisibility(View.VISIBLE);
+        });
+
+        //listen for if adapter ever becomes empty due to search returning no results
+        outfitsAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                checkEmpty();
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                checkEmpty();
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                super.onItemRangeRemoved(positionStart, itemCount);
+                checkEmpty();
+            }
+
+            /** Shows the "No results" message if the adapter is showing 0 items,
+             *  or hides it if it's not empty */
+            void checkEmpty() {
+                //if the search results are empty, show the no results message.
+                if (outfitsAdapter.getItemCount() == 0){
+                    binding.textviewNoResults.setText(R.string.no_search_results_message);
+                    binding.textviewNoResults.setVisibility(View.VISIBLE);
+                }
+                //otherwise hide the message
+                else{
+                    binding.textviewNoResults.setVisibility(View.GONE);
+                }
+            }
         });
 
         /* setup search bar */

@@ -45,7 +45,6 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:text="@string/season_label"
-            style="@style/miniHeading"
             app:layout_constraintEnd_toStartOf="@+id/formality_label"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -57,6 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:text="@string/formality_label"
+
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/season_label"
@@ -92,9 +92,22 @@
         android:layout_height="wrap_content"
         android:visibility="gone"/>
 
+    <TextView
+        android:id="@+id/textview_no_results"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="64dp"
+        android:text="@string/no_search_results_message"
+        android:textAlignment="center"
+        android:visibility="visible"
+        style="@style/normalText"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_outfits"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        tools:visibility="gone"
         tools:listitem="@layout/recyclerview_item_outfit" />
+
+
 </LinearLayout>

@@ -239,12 +239,14 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
             //todo add recyclerview specific preloader - http://bumptech.github.io/glide/int/recyclerview.html
             //set thumbnail image if provided
             ImageView imageView = itemView.findViewById(R.id.imageview_outfit_thumbnail);
-            File imageFile = new File(outfit.getImageUri());
-            Glide.with(parentFragment)
-                    .load(imageFile)
-                    .signature(new ObjectKey(imageFile.lastModified()))
-                    .placeholder(R.drawable.photo_placeholder)
-                    .into(imageView);
+            if(outfit.getImageUri() != null){
+                File imageFile = new File(outfit.getImageUri());
+                Glide.with(parentFragment)
+                        .load(imageFile)
+                        .signature(new ObjectKey(imageFile.lastModified()))
+                        .placeholder(R.drawable.photo_placeholder)
+                        .into(imageView);
+            }
 
             //set textbox listing clothing items, and make it update if their are changes
             outfit.getClothingItems().observe(lifecycleOwner, (clothingItems -> {
