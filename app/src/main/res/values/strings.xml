@@ -47,5 +47,6 @@
         Try modifying your search, or coming up with new outfits!</string>
     <string name="no_outfits_exist">You don\'t have any outfits to display here.
         \nTap the "+" icon in the top right corner to add your first outfit!</string>
+    <string name="double_click_item_hint">Tap again to search for other outfits using this item...</string>
 
 </resources>

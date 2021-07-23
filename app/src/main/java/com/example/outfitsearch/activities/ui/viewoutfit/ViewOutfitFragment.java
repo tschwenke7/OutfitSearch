@@ -38,6 +38,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.ObjectKey;
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.activities.ui.OutfitViewModel;
+import com.example.outfitsearch.activities.ui.browse.BrowseFragmentDirections;
 import com.example.outfitsearch.databinding.FragmentViewOutfitBinding;
 import com.example.outfitsearch.db.tables.ClothingItem;
 import com.example.outfitsearch.db.tables.Outfit;
@@ -323,6 +324,17 @@ public class ViewOutfitFragment extends Fragment
         }
     }
 
+    @Override
+    public void onItemDoubleClicked(int position){
+        String queryString = currentOutfit.getClothingItems().getValue().get(position).getName() + ", ";
+        //navigate to the browse page and tell it to search for the name of the clothing item clicked
+        ViewOutfitFragmentDirections.ActionViewOutfitToBrowse action =
+                ViewOutfitFragmentDirections.actionViewOutfitToBrowse();
+        //pass the clothing item's name as parameter to the navigation action
+        action.setQueryString(queryString);
+        Navigation.findNavController(requireView()).navigate(action);
+    }
+
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
@@ -400,9 +412,6 @@ public class ViewOutfitFragment extends Fragment
             //set selection to the new option
             binding.spinnerSeason.setSelection(seasonOptions.indexOf(newSeason));
             //this will also call onItemSelected, which will update outfit
-
-//            currentOutfit.setSeason(newSeason);
-//            outfitViewModel.updateOutfit(currentOutfit);
         }
     }
 

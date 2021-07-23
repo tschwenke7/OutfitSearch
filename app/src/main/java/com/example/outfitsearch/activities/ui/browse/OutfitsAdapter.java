@@ -252,10 +252,9 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
 
             //set textbox listing clothing items, and make it update if their are changes
             outfit.getClothingItems().observe(lifecycleOwner, (clothingItems -> {
-                List<ClothingItem> items = outfit.getClothingItems().getValue();
                 StringBuilder stringBuilder = new StringBuilder();
-                if(null != items){
-                    for(ClothingItem item : items){
+                if(null != clothingItems){
+                    for(ClothingItem item : clothingItems){
                         stringBuilder.append(item.getName() + ", ");
                     }
                 }

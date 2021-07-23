@@ -21,6 +21,7 @@ public class ClothingItemsAdapter extends RecyclerView.Adapter<ClothingItemsAdap
 
     private List<ClothingItem> items;
     private final ClothingItemClickListener clickListner;
+    private int selectedPos = -1;
 
     public ClothingItemsAdapter(ClothingItemClickListener clickListner) {
         this.clickListner = clickListner;
@@ -36,6 +37,7 @@ public class ClothingItemsAdapter extends RecyclerView.Adapter<ClothingItemsAdap
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull ViewHolder holder, int position) {
+        holder.itemView.setSelected(selectedPos == position);
         holder.bind(getItem(position));
     }
 
@@ -111,13 +113,35 @@ public class ClothingItemsAdapter extends RecyclerView.Adapter<ClothingItemsAdap
             //listen for delete button being clicked
             (itemView.findViewById(R.id.button_delete_item)).setOnClickListener((v) ->
                     clickListener.onDeleteItemClicked(getAdapterPosition()));
+
+            //show double click hint if this item is selected
+            if(itemView.isSelected()){
+                itemView.findViewById(R.id.double_click_hint).setVisibility(View.VISIBLE);
+            }
+            else{
+                itemView.findViewById(R.id.double_click_hint).setVisibility(View.GONE);
+            }
+
+            //listen for main view being clicked
+            itemView.setOnClickListener((view) -> {
+                //if this is the second click, notify the fragment we want to search for this item
+                if(selectedPos == getAdapterPosition()){
+                    clickListener.onItemDoubleClicked(getAdapterPosition());
+                }
+                //if it's the first click, set this item as selected and update the adapter
+                else{
+                    notifyItemChanged(selectedPos);
+                    selectedPos = getAdapterPosition();
+                    notifyItemChanged(selectedPos);
+                }
+            });
         }
     }
 
     public interface ClothingItemClickListener {
         void onDeleteItemClicked(int position);
 
-        //todo - search for all outfits with this item on double click or similar gesture
-//        void onItemDoubleClick(int position, boolean isSecondClick);
+        //search for all outfits with this item on double click or similar gesture
+        void onItemDoubleClicked(int position);
     }
 }

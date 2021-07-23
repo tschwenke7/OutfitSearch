@@ -60,6 +60,7 @@ public class BrowseFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
         setupViews();
+        respondToArgs();
 //        outfitViewModel.getAllOutfits().observe(getViewLifecycleOwner(), (list) -> outfitViewModel.clearAllOutfits());
     }
 
@@ -194,6 +195,13 @@ public class BrowseFragment extends Fragment implements
 
         //listen to selections
         binding.spinnerFormality.setOnItemSelectedListener(this);
+    }
+
+    private void respondToArgs(){
+        String queryString = BrowseFragmentArgs.fromBundle(getArguments()).getQueryString();
+        if(queryString != null){
+            binding.searchBar.setText(queryString);
+        }
     }
 
     @Override

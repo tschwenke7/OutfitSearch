@@ -1,12 +1,7 @@
 package com.example.outfitsearch.activities;
 
-import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
-
-
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.os.Environment;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -15,13 +10,10 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.outfitsearch.R;
 import com.example.outfitsearch.databinding.ActivityMainBinding;
+import com.example.outfitsearch.utils.KeyboardHider;
 
 import android.view.Menu;
 import android.view.MenuItem;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
+        //close keyboard if it was open upon navigating
+        KeyboardHider.hideKeyboard(this);
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
