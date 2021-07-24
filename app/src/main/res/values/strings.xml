@@ -2,21 +2,26 @@
     <string name="app_name">Outfit Search</string>
     <string name="action_settings">Settings</string>
 
+    <!-- Globally used single-word strings -->
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
-
-    <!-- Strings used for fragments for navigation -->
-
 
     <!-- Browse outfits fragment -->
     <string name="browse_fragment_label">Browse Outfits</string>
     <string name="add_outfit_option">Add outfit</string>
-    <string name="browse_button">Browse</string>
     <string name="no_clothing_items_placeholder">No clothing items have been listed - click to add some.</string>
+    <string name="content_description_clear_search">Clear search bar</string>
+    <string name="search_bar_hint">Find outfits with this clothing item/s…</string>
+    <string name="all_spinner_option">All</string>
+    <string name="no_search_results_message">No outfits were found which matched your search query/s and filters.\n\n
+        Try modifying your search, or coming up with new outfits!</string>
+    <string name="no_outfits_exist">You don\'t have any outfits to display here.
+        \nTap the "+" icon in the top right corner to add your first outfit!</string>
 
     <!-- View outfit fragment -->
     <string name="view_outfit_fragment_label">View Outfit</string>
     <string name="take_photo_button">Take Photo</string>
+    <string name="browse_button">Browse</string>
     <string name="content_description_outfit_photo">Photo of outfit</string>
     <string name="delete_outfit_option">Delete outfit</string>
     <string name="add_button">Add</string>
@@ -41,12 +46,6 @@
     <string name="ok">Ok</string>
     <string name="outfit_search_hint">Enter one or more keywords to match clothing items, separated by commas.</string>
     <string name="search_filters_heading">Filter outfits by</string>
-    <string name="search_bar_hint">Find outfits using this clothing item/s…</string>
-    <string name="all_spinner_option">All</string>
-    <string name="no_search_results_message">No outfits were found which matched your search query/s and filters.\n\n
-        Try modifying your search, or coming up with new outfits!</string>
-    <string name="no_outfits_exist">You don\'t have any outfits to display here.
-        \nTap the "+" icon in the top right corner to add your first outfit!</string>
-    <string name="double_click_item_hint">Tap again to search for other outfits using this item...</string>
+    <string name="double_click_item_hint">Tap again to search for other outfits using this item…</string>
 
 </resources>

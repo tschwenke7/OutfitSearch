@@ -151,6 +151,13 @@ public class BrowseFragment extends Fragment implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 outfitsAdapter.getFilter().filter(s);
+                //show clear search button if there's any text in the search bar
+                if (s.length() == 0){
+                    binding.clearSearchButton.setVisibility(View.GONE);
+                }
+                else{
+                    binding.clearSearchButton.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -172,6 +179,9 @@ public class BrowseFragment extends Fragment implements
         searchBar.setAdapter(searchBarAdapter);
         //configure autocomplete to consider comma separated phrases as separate tokens
         searchBar.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+
+        //setup clear searchbar button
+        binding.clearSearchButton.setOnClickListener(view -> searchBar.setText(""));
 
         /* Setup category drop down spinners */
         //setup season spinner

@@ -9,22 +9,38 @@
     android:orientation="vertical"
     android:layout_margin="@dimen/default_margin">
 
-    <MultiAutoCompleteTextView
-        android:id="@+id/search_bar"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:iconifiedByDefault="false"
-        android:background="@drawable/searchview_backgroud"
-        android:drawableStart="@drawable/search_icon_24"
-        android:padding="12dp"
-        android:drawablePadding="4dp"
-        android:hint="@string/search_bar_hint"
-        android:imeOptions="actionSearch"
-        android:inputType="textAutoCorrect"
-        tools:text="fniuewieuhiewrwucfiwehcwencfgwencfgiwecnfgiwucnfiewcniwwnefuwiancf"
-        android:maxLines="5"
-        android:completionThreshold="1"
-        />
+        android:layout_height="wrap_content">
+
+        <MultiAutoCompleteTextView
+            android:id="@+id/search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/searchview_backgroud"
+            android:completionThreshold="1"
+            android:drawableStart="@drawable/search_icon_24"
+            android:drawablePadding="4dp"
+            android:hint="@string/search_bar_hint"
+            android:iconifiedByDefault="false"
+            android:imeOptions="actionSearch"
+            android:inputType="textAutoCorrect"
+            android:maxLines="5"
+            android:padding="12dp"
+            android:paddingEnd="34dp"
+            tools:text="fniuewieuhiewrwucfiwehcwencfgwencfgiwecnfgiwucnfiewcniwwnefuwiancf" />
+
+        <ImageButton
+            android:id="@+id/clear_search_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            android:contentDescription="@string/content_description_clear_search"
+            android:layout_gravity="end|center_vertical"
+            android:background="@drawable/x_icon_24" />
+    </FrameLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_category_spinners"
         android:layout_width="match_parent"
