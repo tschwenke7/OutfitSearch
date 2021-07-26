@@ -21,7 +21,7 @@
     <!-- View outfit fragment -->
     <string name="view_outfit_fragment_label">View Outfit</string>
     <string name="take_photo_button">Take Photo</string>
-    <string name="browse_button">Browse</string>
+    <string name="browse_button">Browse Photos</string>
     <string name="content_description_outfit_photo">Photo of outfit</string>
     <string name="delete_outfit_option">Delete outfit</string>
     <string name="add_button">Add</string>
@@ -47,5 +47,6 @@
     <string name="outfit_search_hint">Enter one or more keywords to match clothing items, separated by commas.</string>
     <string name="search_filters_heading">Filter outfits by</string>
     <string name="double_click_item_hint">Tap again to search for other outfits using this item…</string>
+    <string name="empty_outfit_deleted_toast">Outfit draft discarded since it had no content.</string>
 
 </resources>

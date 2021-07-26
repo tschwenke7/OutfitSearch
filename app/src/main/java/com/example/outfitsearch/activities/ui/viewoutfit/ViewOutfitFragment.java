@@ -439,6 +439,15 @@ public class ViewOutfitFragment extends Fragment
     }
 
     @Override
+    public void onDestroy() {
+        if (currentOutfit.getImageUri() == null && currentOutfit.getClothingItems().getValue().isEmpty()) {
+            outfitViewModel.deleteOutfit(currentOutfit);
+            Toast.makeText(requireContext(), R.string.empty_outfit_deleted_toast, Toast.LENGTH_SHORT).show();
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public void onNothingSelected(AdapterView<?> parent) {
         Log.d(TAG, "onNothingSelected: ");
     }
