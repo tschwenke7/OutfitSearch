@@ -28,12 +28,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 public class OutfitViewModel extends AndroidViewModel {
     private final OutfitRepository outfitRepository;
     private final MutableLiveData<List<Outfit>> allOutfits = new MutableLiveData<>();
     private final App app;
+    private Random random = new Random();
+    /** A list of positions in the currently displayed search results in BrowseFragment's recyclerview,
+     * which have not been randomly selected from the "Choose for me" button since the recyclerview
+     * last changed. */
+    private List<Integer> unchosenRandomIndices;
+    /** The number of search results last time the OutfitViewModel#resetRandomOutfitQueue method was
+     * called. */
+    private int previousResultSpaceSize;
 
     public OutfitViewModel(@NonNull @NotNull Application application) {
         super(application);
@@ -272,5 +281,47 @@ public class OutfitViewModel extends AndroidViewModel {
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    /** Generates a list of integers starting from 0 incrementing by 1 of the specified size
+     * @param size - the size of list to generate
+     * @return a list of size 'size' starting at 0 and counting up by 1s e.g. [0, 1, 2, ..., <size-1>]
+     */
+    private List<Integer> newSequentialList(int size){
+        List<Integer> list = new ArrayList<>();
+        for(int i = 0; i < size; i++){
+            list.add(i);
+        }
+        return list;
+    }
+
+    /**
+     * Call this method every time the displayed content of the outfit recyclerview is changed.
+     * If the number of search results has changed, resets the list of results positions which
+     * haven't yet been chosen by getRandomOutfitListIndex.
+     * @param size - the new size of the outfitRecyclerView adapter's contents.
+     */
+    public void resetRandomOutfitQueue(int size) {
+        if(size != previousResultSpaceSize){
+            unchosenRandomIndices = newSequentialList(size);
+            previousResultSpaceSize = size;
+        }
+    }
+
+    /**
+     * Chooses a random index from within the size of the outfitAdapter's current list size
+     * without replacement (until all indices have been chosen once, at which point all are replaced).
+     * Make sure to keep the bounds up to date by calling outfitViewModel#resetRandomOutfitQueue
+     * each time the list changes size.
+     * @return - a random index within the bounds of 0 to outfitAdapter.getItemCount()-1,
+     */
+    public int getRandomOutfitListIndex() {
+        //if random has already chosen every outfit, refresh the remaining randoms list
+        if (unchosenRandomIndices.isEmpty()){
+            unchosenRandomIndices = newSequentialList(previousResultSpaceSize);
+        }
+
+        //randomly chooses an index that hasn't already been chosen from the current outfit list
+        return unchosenRandomIndices.remove(random.nextInt(unchosenRandomIndices.size()));
     }
 }

@@ -66,6 +66,30 @@ public class BrowseFragment extends Fragment implements
 
     private void setupViews() {
         /* setup outfit recyclerview */
+        setupOutfitRecyclerView();
+
+        /* setup search bar */
+        setupSearchBar();
+
+        /* Setup category drop down spinners */
+        setupCategorySpinners();
+
+        /* Setup 'choose for me' button */
+        binding.buttonChooseForMe.setOnClickListener(view -> {
+            //randomly select from one of the currently displayed outfits and navigate directly to
+            //its view page
+                int outfitId = outfitsAdapter.getItem(
+                        outfitViewModel.getRandomOutfitListIndex())
+                        .getId();
+
+                //navigate to the view outfit page, passing the outfit's unique id as a parameter
+                BrowseFragmentDirections.ActionViewSpecificOutfit action = BrowseFragmentDirections.actionViewSpecificOutfit();
+                action.setOutfitId(outfitId);
+                Navigation.findNavController(requireView()).navigate(action);
+        });
+    }
+
+    private void setupOutfitRecyclerView() {
         RecyclerView outfitRecyclerView = binding.recyclerviewOutfits;
         outfitsAdapter = new OutfitsAdapter(this, getViewLifecycleOwner(), this);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireActivity(), GRID_ROW_SIZE);
@@ -98,6 +122,11 @@ public class BrowseFragment extends Fragment implements
             public void onChanged() {
                 super.onChanged();
                 checkEmpty();
+
+                /* Update the view model with the number of items currently matching the search.
+                 * This allows it to choose random outfits w/o replacement even when this fragment
+                 * is not active. */
+                outfitViewModel.resetRandomOutfitQueue(outfitsAdapter.getItemCount());
             }
 
             @Override
@@ -131,8 +160,9 @@ public class BrowseFragment extends Fragment implements
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new SwipeToPassCallback(outfitsAdapter, this));
         itemTouchHelper.attachToRecyclerView(outfitRecyclerView);
+    }
 
-        /* setup search bar */
+    private void setupSearchBar() {
         MultiAutoCompleteTextView searchBar = binding.searchBar;
 
         //configure searchbar to not allow newline character entries, but still allow wrapping
@@ -144,13 +174,12 @@ public class BrowseFragment extends Fragment implements
         //have it listen and update results in realtime as the user types
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 outfitsAdapter.getFilter().filter(s);
+
                 //show clear search button if there's any text in the search bar
                 if (s.length() == 0){
                     binding.clearSearchButton.setVisibility(View.GONE);
@@ -161,9 +190,7 @@ public class BrowseFragment extends Fragment implements
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) {}
         });
 
         //hide keyboard when enter key pressed when using searchbar, so user can see the results
@@ -182,8 +209,9 @@ public class BrowseFragment extends Fragment implements
 
         //setup clear searchbar button
         binding.clearSearchButton.setOnClickListener(view -> searchBar.setText(""));
+    }
 
-        /* Setup category drop down spinners */
+    private void setupCategorySpinners() {
         //setup season spinner
         seasonOptions = new ArrayList<>();
         seasonOptions.add(getResources().getString(R.string.all_spinner_option));

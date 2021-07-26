@@ -1,6 +1,5 @@
 package com.example.outfitsearch.activities.ui.browse;
 
-import android.graphics.Canvas;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -89,13 +87,13 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
             List<Outfit> finalFilteredList = new ArrayList<>();
 
             //if recipes haven't finished loading yet, wait until they have
-            while (outfitsFull == null){
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+//            while (outfitsFull == null){
+//                try {
+//                    Thread.sleep(50);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
 
             //first, filter all outfits that don't meet the season and formality filters set, if applicable
             //if the filter values are null, that means any value is allowed

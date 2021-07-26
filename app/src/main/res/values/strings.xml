@@ -48,5 +48,6 @@
     <string name="search_filters_heading">Filter outfits by</string>
     <string name="double_click_item_hint">Tap again to search for other outfits using this item…</string>
     <string name="empty_outfit_deleted_toast">Outfit draft discarded since it had no content.</string>
+    <string name="choose_for_me_button">Choose for me!</string>
 
 </resources>
