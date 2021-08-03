@@ -4,7 +4,7 @@ Sick of wasting time in the morning trying to choose something to wear? Can't re
 Using this app, you can save photos of each outfit you wear, along with its season, formality and a list of the clothing items that make it up. You can then scroll through and easily browse your previous outfits, search for outfits with specific items or types of item (e.g. colour, 'pants') or you can hit the "choose for me" button if you really can't decide.
 
 ## Installation
-To install Outfit Search on your Android device, download the file "OutfitSearch_<version>.apk" in the root directory of this repo to your device and open it (see here for guide: https://www.nextpit.com/android-for-beginners-what-is-an-apk-file#howtofromandroid).
+To install Outfit Search on your Android device, download the file "OutfitSearch.apk" in the root directory of this repo to your device and open it (see here for guide: https://www.nextpit.com/android-for-beginners-what-is-an-apk-file#howtofromandroid).
 
 ## Searching for outfits
 ### Adding a new outfit
