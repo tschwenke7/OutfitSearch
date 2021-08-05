@@ -3,26 +3,44 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/BrowseFragment">
 
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="com.example.outfitsearch.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        android:id="@+id/BrowseFragment"
+        android:name="com.example.outfitsearch.activities.ui.browse.BrowseFragment"
+        android:label="@string/browse_fragment_label"
+        tools:layout="@layout/fragment_browse">
 
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            android:id="@+id/action_view_specific_outfit"
+            app:destination="@id/ViewOutfitFragment"
+            app:enterAnim="@anim/slide_in_right_delayed"
+            app:exitAnim="@anim/slide_out_left_delayed"
+            app:popEnterAnim="@anim/slide_in_left_delayed"
+            app:popExitAnim="@anim/slide_out_right_delayed"/>
+        <argument
+            android:name="queryString"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
     </fragment>
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.example.outfitsearch.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
+        android:id="@+id/ViewOutfitFragment"
+        android:name="com.example.outfitsearch.activities.ui.viewoutfit.ViewOutfitFragment"
+        android:label="@string/view_outfit_fragment_label"
+        tools:layout="@layout/fragment_view_outfit">
 
+        <argument
+            android:name="outfitId"
+            app:argType="integer"
+            android:defaultValue="-1" />
         <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
+            android:id="@+id/action_view_outfit_to_browse"
+            app:destination="@id/BrowseFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left"
+            />
     </fragment>
 </navigation>

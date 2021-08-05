@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- font colors-->
+    <color name="primaryText">#000000</color>
+    <color name="secondaryTextLight">#444444</color>
+
+
 </resources>

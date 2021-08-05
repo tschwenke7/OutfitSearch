@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="subheading">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/primaryText</item>
+    </style>
+
+    <style name="miniHeading">
+        <item name="android:textColor">@color/secondaryTextLight</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="normalText">
+        <item name="android:textColor">@color/secondaryTextLight</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="normalTextEm">
+        <item name="android:textColor">@color/primaryText</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="mediumText">
+        <item name="android:textColor">@color/secondaryTextLight</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+</resources>
