@@ -19,6 +19,9 @@ public interface ClothingItemDao {
     @Update
     void update(ClothingItem clothingItem);
 
+    @Update
+    void updateAll(List<ClothingItem> clothingItems);
+
     @Delete
     void delete(ClothingItem clothingItem);
 
@@ -30,4 +33,7 @@ public interface ClothingItemDao {
 
     @Query("SELECT * FROM clothing_items WHERE outfit_id = :outfitId")
     LiveData<List<ClothingItem>> getAllFromOutfitLive(int outfitId);
+
+    @Query("SELECT * FROM clothing_items WHERE name = :name")
+    LiveData<List<ClothingItem>> getAllWithName(String name);
 }

@@ -3,6 +3,7 @@ package com.example.outfitsearch.activities.ui.viewoutfit;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -10,7 +11,6 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.outfitsearch.R;
-import com.example.outfitsearch.databinding.RecyclerviewItemClothingItemBinding;
 import com.example.outfitsearch.db.tables.ClothingItem;
 
 import org.jetbrains.annotations.NotNull;
@@ -101,32 +101,40 @@ public class ClothingItemsAdapter extends RecyclerView.Adapter<ClothingItemsAdap
     public class ViewHolder extends RecyclerView.ViewHolder{
         private ClothingItemClickListener clickListener;
 
-        public ViewHolder(@NonNull @NotNull View itemView, ClothingItemClickListener clickListner) {
+        public ViewHolder(@NonNull @NotNull View itemView, ClothingItemClickListener clickListener) {
             super(itemView);
-            this.clickListener = clickListner;
+            this.clickListener = clickListener;
         }
 
         public void bind(ClothingItem item){
+            TextView textview = itemView.findViewById(R.id.text_view_item_name);
+            EditText editText = itemView.findViewById(R.id.edit_text_item_name);
+            View confirmEdit = itemView.findViewById(R.id.button_edit_item_confirm);
+            View deleteButton = itemView.findViewById(R.id.button_delete_item);
+            TextView hintText = itemView.findViewById(R.id.text_view_action_hint);
+
             //set text to item's name
-            ((TextView) itemView.findViewById(R.id.text_view_item_name)).setText(item.getName());
+            textview.setText(item.getName());
+            editText.setText(item.getName());
 
             //listen for delete button being clicked
-            (itemView.findViewById(R.id.button_delete_item)).setOnClickListener((v) ->
+            deleteButton.setOnClickListener(v ->
                     clickListener.onDeleteItemClicked(getAdapterPosition()));
 
             //show double click hint if this item is selected
             if(itemView.isSelected()){
-                itemView.findViewById(R.id.double_click_hint).setVisibility(View.VISIBLE);
+                hintText.setVisibility(View.VISIBLE);
+                hintText.setText(R.string.double_click_item_hint);
             }
             else{
-                itemView.findViewById(R.id.double_click_hint).setVisibility(View.GONE);
+                hintText.setVisibility(View.GONE);
             }
 
             //listen for main view being clicked
-            itemView.setOnClickListener((view) -> {
+            textview.setOnClickListener((view) -> {
                 //if this is the second click, notify the fragment we want to search for this item
                 if(selectedPos == getAdapterPosition()){
-                    clickListener.onItemDoubleClicked(getAdapterPosition());
+                    clickListener.onClothingItemDoubleClicked(getAdapterPosition());
                 }
                 //if it's the first click, set this item as selected and update the adapter
                 else{
@@ -135,6 +143,39 @@ public class ClothingItemsAdapter extends RecyclerView.Adapter<ClothingItemsAdap
                     notifyItemChanged(selectedPos);
                 }
             });
+
+            //when long clicked, enable editing and show edit confirm button.
+            textview.setOnLongClickListener(view -> {
+                //swap visible Views to those necessary for editing
+                editText.setVisibility(View.VISIBLE);
+                confirmEdit.setVisibility(View.VISIBLE);
+                hintText.setText(R.string.long_click_item_hint);
+                hintText.setVisibility(View.VISIBLE);
+
+                textview.setVisibility(View.GONE);
+                deleteButton.setVisibility(View.GONE);
+
+                //de-select this item if it was selected
+                itemView.setSelected(false);
+                if(selectedPos == getAdapterPosition()){
+                    selectedPos = -1;
+                }
+                return true;
+            });
+
+            //change layout back to normal when confirm clicked, and notify the fragment of the update
+            confirmEdit.setOnClickListener(v -> {
+                textview.setText(editText.getText());
+
+                textview.setVisibility(View.VISIBLE);
+                deleteButton.setVisibility(View.VISIBLE);
+
+                hintText.setVisibility(View.GONE);
+                confirmEdit.setVisibility(View.GONE);
+                editText.setVisibility(View.GONE);
+
+                clickListener.onEditItemClicked(getAdapterPosition(), editText.getText().toString());
+            });
         }
     }
 
@@ -142,6 +183,8 @@ public class ClothingItemsAdapter extends RecyclerView.Adapter<ClothingItemsAdap
         void onDeleteItemClicked(int position);
 
         //search for all outfits with this item on double click or similar gesture
-        void onItemDoubleClicked(int position);
+        void onClothingItemDoubleClicked(int position);
+
+        void onEditItemClicked(int position, String newItemName);
     }
 }

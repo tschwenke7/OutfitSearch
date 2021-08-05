@@ -125,34 +125,61 @@ public class OutfitsAdapter extends RecyclerView.Adapter<OutfitsAdapter.ViewHold
                 //read and split up the query string into separate items split by commas
                 String filterPattern = constraint.toString().toLowerCase().trim();
                 String[] itemsToMatch = filterPattern.split(",");
+                /** Corresponds to items to match. If true, find outfits with items containing this
+                 * query, if false, find with NO item with occurrences of this query */
+                boolean[] itemMatchMode = new boolean[itemsToMatch.length];
 
-                //trim item names
+                //trim item names and check if they are to be found or not found (not found if ending with "!")
                 for (int i = 0; i < itemsToMatch.length; i++){
                     itemsToMatch[i] = itemsToMatch[i].trim();
+                    if(itemsToMatch[i].endsWith("!")){
+                        itemMatchMode[i] = false;
+                        //remove "!" from the query term
+                        itemsToMatch[i] = itemsToMatch[i].substring(0, itemsToMatch[i].length() - 1);
+                    }
+                    else{
+                        itemMatchMode[i] = true;
+                    }
                 }
 
                 //find all outfits which match the search criteria
                 for (Outfit outfit : categoricallyFilteredList) {
                     //this array maintains which query components have been matched
                     //as we iterate through them
-                    boolean[] found = new boolean[itemsToMatch.length];
+                    boolean[] matched = new boolean[itemsToMatch.length];
 
                     //loop through each clothing item of the outfit,
                     //and try to match against each thus far unfound query component
-                    for (ClothingItem clothingItem : outfit.getLatestClothingItems()) {
+                    outfitLoop: for (ClothingItem clothingItem : outfit.getLatestClothingItems()) {
                         int i = 0;
                         String itemNameLowerCase = clothingItem.getName().toLowerCase();
                         //loop through each item to match that hasn't yet been matched by this outfit
-                        while (!isAllTrue(found) && i < itemsToMatch.length) {
-                            if (!found[i] && itemNameLowerCase.contains(itemsToMatch[i])) {
-                                found[i] = true;
+                        while (!isAllTrue(matched) && i < itemsToMatch.length) {
+                            //items ending ing '!' should NOT be found in an outfit to match
+                            if (itemMatchMode[i] == false){
+                                //end the search immediately if a '!' item is found
+                                if (itemNameLowerCase.contains(itemsToMatch[i])) {
+                                    matched[i] = false;
+                                    break outfitLoop;
+                                }
+                                //if the '!' item wasn't found then this condition query is matched -
+                                //once we've checked ALL clothing items don't contain it
+                                else{
+                                    //set matched = true if this was the last clothing item and the query was never found
+                                    if (clothingItem.getId() == outfit.getLatestClothingItems().get(outfit.getLatestClothingItems().size() - 1).getId())
+                                        matched[i] = true;
+                                }
+                            }
+                            //otherwise attempt to find the query within this clothing item
+                            else if (!matched[i] && itemNameLowerCase.contains(itemsToMatch[i])) {
+                                matched[i] = true;
                             }
                             i++;
                         }
                     }
 
                     //add this outfit to the list if all itemsToMatch were found within its items
-                    if (isAllTrue(found)) {
+                    if (isAllTrue(matched)) {
                         finalFilteredList.add(outfit);
                     }
                 }

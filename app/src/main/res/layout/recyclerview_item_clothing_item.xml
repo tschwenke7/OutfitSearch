@@ -25,7 +25,18 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_weight="1"
-            tools:text="Green velvet shirt" />
+            tools:text="Green velvet shirt"
+            />
+        <EditText
+            android:id="@+id/edit_text_item_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            tools:text="Green velvet shirt"
+            style="@style/mediumText"
+            android:visibility="gone"
+            />
 
         <ImageView
             android:id="@+id/button_delete_item"
@@ -34,11 +45,19 @@
             android:contentDescription="@string/delete_button"
             app:srcCompat="@drawable/bin_icon_24"
             app:tint="@color/list_item_text"/>
+        <ImageView
+            android:id="@+id/button_edit_item_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/delete_button"
+            app:srcCompat="@drawable/tick_icon_24"
+            android:visibility="gone"
+            app:tint="@color/list_item_text"/>
     </LinearLayout>
 
     <TextView
 
-        android:id="@+id/double_click_hint"
+        android:id="@+id/text_view_action_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/list_item_text"
@@ -55,5 +74,5 @@
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/double_click_hint" />
+        app:layout_constraintTop_toBottomOf="@id/text_view_action_hint" />
 </LinearLayout>

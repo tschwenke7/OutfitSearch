@@ -324,4 +324,26 @@ public class OutfitViewModel extends AndroidViewModel {
         //randomly chooses an index that hasn't already been chosen from the current outfit list
         return unchosenRandomIndices.remove(random.nextInt(unchosenRandomIndices.size()));
     }
+
+    /**
+     * Updates all the name of this clothing item and all clothing items with the same name in other
+     * outfits to the newItemName
+     * @param item - the original item being changed.
+     * @param newItemName - the new name to change to.
+     */
+    public void editClothingItemName(ClothingItem item, String newItemName) {
+        //retrieve all database entries that match the name of this clothing item, and update each
+        //of them with the new item name
+        LiveData<List<ClothingItem>> dataToFetch = outfitRepository.getAllClothingItemsWithName(item.getName());
+        dataToFetch.observeForever(new Observer<List<ClothingItem>>() {
+            @Override
+            public void onChanged(List<ClothingItem> clothingItems) {
+                for (ClothingItem c : clothingItems) {
+                    c.setName(newItemName);
+                }
+                outfitRepository.updateClothingItems(clothingItems);
+                dataToFetch.removeObserver(this);
+            }
+        });
+    }
 }

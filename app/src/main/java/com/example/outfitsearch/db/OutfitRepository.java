@@ -111,4 +111,12 @@ public class OutfitRepository {
 
         return future.get();
     }
+
+    public LiveData<List<ClothingItem>> getAllClothingItemsWithName(String name){
+        return clothingItemDao.getAllWithName(name);
+    }
+
+    public void updateClothingItems(List<ClothingItem> clothingItems){
+        OutfitDatabase.databaseWriterExecutor.execute(() -> clothingItemDao.updateAll(clothingItems));
+    }
 }

@@ -325,7 +325,7 @@ public class ViewOutfitFragment extends Fragment
     }
 
     @Override
-    public void onItemDoubleClicked(int position){
+    public void onClothingItemDoubleClicked(int position){
         String queryString = currentOutfit.getClothingItems().getValue().get(position).getName() + ", ";
         //navigate to the browse page and tell it to search for the name of the clothing item clicked
         ViewOutfitFragmentDirections.ActionViewOutfitToBrowse action =
@@ -333,6 +333,20 @@ public class ViewOutfitFragment extends Fragment
         //pass the clothing item's name as parameter to the navigation action
         action.setQueryString(queryString);
         Navigation.findNavController(requireView()).navigate(action);
+    }
+
+    @Override
+    public void onEditItemClicked(int position, String newItemName) {
+        //if the user entered a valid replacement name, update the clothing item in the database
+        if (!newItemName.isEmpty()){
+            ClothingItem item = currentOutfit.getClothingItems().getValue().get(position);
+            outfitViewModel.editClothingItemName(item, newItemName);
+        }
+        //otherwise inform them of failure
+        else{
+            Toast.makeText(requireContext(), R.string.error_no_clothing_item_name, Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 
